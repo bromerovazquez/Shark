@@ -1,0 +1,44 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Drim.Interfaces.MVC.Entities
+{
+    [Table("MOVIMENTS")]
+    public class Movimiento
+    {
+
+      public int ID { get;set;}
+      public string CODALMACENORIGEN{get;set;}
+      public string CODALMACENDESTINO{get;set;}
+      public string NUMSERIE{get;set;}
+      public int CODARTICULO{get;set;}
+      public string TALLA{get;set;}
+      public string COLOR{get;set;}
+      public double? PRECIO{get;set;}
+      public DateTime? FECHA{get;set;}
+      public DateTime? HORA{get;set;}
+      public double? CODPROCLI{get;set;}
+      public string TIPO{get;set;}
+      public double? UNIDADES{get;set;}
+      public string SERIEDOC{get;set;}
+      public double? NUMDOC{get;set;}
+      public string SERIECOMPRA{get;set;}
+      public int? NUMFACCOMPRA{get;set;}
+      public string CAJA{get;set;}
+      public double? STOCK{get;set;}
+      public double? PVP{get;set;}
+      public int? CODMONEDAPVP{get;set;}
+      public char? CALCMOVPOST{get;set;}
+      public double? UDMEDIDA2{get;set;}
+      public string ZONA{get;set;}
+      public double? PVPDMN{get;set;}
+      public double? PRECIODMN{get;set;}
+      public double? STOCK2 {get;set;}
+      public double? UNID1 {get;set;}
+      public double? UNID2 {get;set;}
+      public double? UNID3 {get;set;}
+      public double? UNID4 {get;set;}
+      public int? CODFORMATO{get;set;}
+
+
+    }
+}

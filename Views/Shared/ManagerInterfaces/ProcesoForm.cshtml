@@ -1,0 +1,146 @@
+﻿@model Drim.Interfaces.MVC.Entities.Interfaces_Procesos
+
+
+
+<script>
+
+    $(document).ready(function(){
+
+
+        $("#divContentDetalleArchivo").delegate("#btnGuardarArchivo","click",function(e){
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+              var archivo = GetModeloDataByContentDiv("divContentArchivo");
+
+              console.log(archivo);
+
+              $.ajax({
+                type: 'POST',
+                url: '@Url.Action("UpdateArchivo","ManagerInterfaces")' ,
+                data:{  "jsonArchivo": JSON.stringify(archivo)},
+                success: function (data)
+                {
+                    $("#divContentDetalleArchivo").html(data);
+                    $("#divContentDetalleArchivo").show();
+
+                },
+                beforeSend: function (e) {
+                    $("#divContentDetalleArchivo").html("");
+                }
+                });
+
+
+        });
+
+
+
+    });
+
+
+     var GetModeloDataByContentDiv = function(contentId){
+
+
+        var content = document.getElementById(contentId);
+        var inputs = content.getElementsByTagName("input");
+        var selects = content.getElementsByTagName("select");
+        var objeto = {};
+
+        for (var j = 0; j < inputs.length; j++) {
+            
+            var nombre = inputs[j].getAttribute("name");
+
+            var type = inputs[j].getAttribute("type");
+
+            var valor = "";
+
+            if(type == "checkbox")
+            {
+
+                if(inputs[j].checked)
+                {
+                    valor = true;
+                }else
+                {
+                    valor = false;
+                }
+
+                 console.log(valor);
+            }
+            else
+            {
+                valor = inputs[j].value;
+            }
+
+           
+            
+
+            objeto[nombre] =  valor;
+
+            if(type == "checkbox")
+            {
+                console.log(objeto[nombre]);
+            }
+        }
+
+        for (var k = 0; k < selects.length; k++) {
+            var nombre = selects[k].getAttribute("name");
+            var valor = selects[k].value;
+            objeto[nombre] = valor;
+        }
+
+            return objeto;
+        }
+
+
+
+</script>
+
+
+<div id="divContentArchivo" class="form-container">
+
+    @Html.HiddenFor(model => model.ArchivoId, new { @class = "form-control", id = "ArchivoId", name="ArchivoId" })
+
+    <div class="row row-spacing g-3">
+
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.TextBoxFor(model => model.NombreProceso, new { @class = "form-control", id = "NombreProceso", name="NombreProceso" })
+                <label for="floatingInput2">Nombre de Proceso</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.TextBoxFor(model => model.DescripcionProceso, new { @class = "form-control", id = "DescripcionProceso", name="DescripcionProceso" })
+                <label for="floatingInput3">Descripción de Proceso</label>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row row-spacing g-2">
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.TextBoxFor(model => model.Orden, new { @class = "form-control" ,@type = "number", id = "Orden", name="Orden" })
+                <label for="floatingInput6">Orden</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <label for="Activo">Activo</label>
+            @if (Model.IsActivo)
+            {
+                <input type="checkbox" id="IsActivo" checked="checked" name="IsActivo" class="form-checkbox" />
+            }else{
+                <input type="checkbox" id="IsActivo"  name="IsActivo" class="form-checkbox" />
+            }
+        </div>
+    </div>
+
+
+
+
+    <input type="submit" id="btnGuardarArchivo" value="Guardar" class="btn btn-primary" />
+</div>
+
+

@@ -1,0 +1,277 @@
+﻿@model List<Drim.Interfaces.MVC.ViewModels.Traspaso>
+
+
+@{
+
+    var IsActivaDescuadreY = ViewData["IsActivaDescuadreY"] != null ? true : false;
+
+    var DescuadresYTickets = ViewData["DescuadresYTickets"] != null ? (string)ViewData["DescuadresYTickets"] : string.Empty;
+
+
+    var IsAlbaranes = ViewData["IsAlbaranes"] != null ? (bool)ViewData["IsAlbaranes"] : false;
+
+}
+
+<script>
+
+    $(document).ready(function()
+    {
+
+    $('.verdetalletickets').on("click",function(e)
+    {
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log("verdetalletickets");
+
+        var estado = $(this).data('estado');
+        var origen = $(this).data('origen');
+        var destino = $(this).data('destino');
+        var fecha = $(this).data('fecha');
+        var codarticulo = $(this).data('codarticulo');
+        var idmatch = $(this).data('idmatch');
+
+
+        var trDetalle = $(".trDetalleTicket_" + origen + "_" + destino + "_" + fecha + "_"+  codarticulo).first();
+        var contentDetalle = trDetalle.find('.tdcontentDetalleTickets').first();
+
+
+        console.log($(this).hasClass('activodetalletraspaso'));
+
+        if(!$(this).hasClass('activodetalletraspaso'))
+        {
+            GetDetalleTicket(origen,destino,fecha,codarticulo,idmatch,contentDetalle);
+
+            $(this).html("Ocultar Tickets");
+            trDetalle.show();
+            $(this).addClass('activodetalletraspaso');
+
+        }else
+        {
+
+         $(this).html("Ver Tickets");
+         trDetalle.hide();
+         $(this).removeClass('activodetalletraspaso');
+        }
+
+    });
+
+
+     $('.verdetallearticulo').on("click",function(e)
+    {
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log("verdetallearticulo");
+
+        
+        var origen = $(this).data('origen');
+        var destino = $(this).data('destino');
+        var codarticulo = $(this).data('codarticulo');
+
+        var trDetalle = $(".trDetalleArticulo_" + origen + "_" + destino + "_" +  codarticulo).first();
+        var contentDetalle = trDetalle.find('.tdcontentDetalleArticulo').first();
+
+        console.log($(this).hasClass('activodetalletraspaso'));
+
+        if(!$(this).hasClass('activodetalletraspaso'))
+        {
+            $(this).html("Ocultar Detalle");
+            trDetalle.show();
+            $(this).addClass('activodetalletraspaso');
+
+        }else
+        {
+
+         $(this).html("Ver Detalle");
+         trDetalle.hide();
+         $(this).removeClass('activodetalletraspaso');
+        }
+
+    });
+
+
+
+
+    var GetDetalleTicket = function(origen,destino,fecha,codarticulo,idMatch,contentDetalle)
+    {
+
+
+         $.ajax({
+         type: 'GET',
+         url: '@Url.Action("GetTicketDetalle","Albaranes")' + "?codAlmacenOrigen=" + origen + "&codAlmacenDestino=" + destino + "&fecha=" + fecha  + "&codarticulo=" + codarticulo + "&idMatch=" + idMatch,
+         success: function (data)
+         {
+             $("#divModalLoading").modal("hide");
+             contentDetalle.html(data);
+         },
+         beforeSend: function (e) {
+             $("#divModalLoading").modal("show");
+             contentDetalle.html("");
+         }
+     });
+
+
+    };
+
+
+    });
+
+</script>
+
+
+<style>
+
+    .traspasoYDescuadre {
+        background-color: red;
+    }
+
+    .traspasoYCuadre {
+        background-color: green;
+    }
+
+</style>
+
+
+
+@if (IsActivaDescuadreY)
+{
+    @if (string.IsNullOrEmpty(DescuadresYTickets) || DescuadresYTickets == "1")
+    {
+        <p>Con Ticket: @Model.Where(x=> x.IdMatchTiektDevolucion.HasValue).Count()</p>
+    }
+    @if (string.IsNullOrEmpty(DescuadresYTickets) || DescuadresYTickets == "2")
+    {
+        <p>Con Ticket Historico: @Model.Where(x=> !x.IdMatchTiektDevolucion.HasValue &&  x.IsExistsTickets.HasValue && x.IsExistsTickets.Value).Count()</p>
+    }
+    @if (string.IsNullOrEmpty(DescuadresYTickets) || DescuadresYTickets == "3")
+    {
+        <p>Sin Tickets: @Model.Where(x=> !x.IsExistsTickets.HasValue || ( x.IsExistsTickets.HasValue && !x.IsExistsTickets.Value)).Count()</p>
+    }
+
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Almacen Origen</th>
+            <th>Almacen Destino</th>
+            <th>codArticulo/Ref</th>
+            <th>Descrpicion</th>
+            <th>Cantidad</th>
+            <th>Stock Origen</th>
+            <th>Stock Destino</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var traspaso in Model.GroupBy(g => new { g.codAlmacenOrigen, g.codAlmacenDestino, g.CodArticulo }))
+        {
+            <tr>
+
+                <td>
+                     <a href="#" data-origen="@traspaso.Key.codAlmacenOrigen" data-destino="@traspaso.Key.codAlmacenDestino" data-codarticulo="@traspaso.Key.CodArticulo" style="cursor:pointer;" class="verdetallearticulo">Ver Detalle</a>
+                </td>
+                <td>
+                    @traspaso.First().AlmacenOrigen
+                </td>
+                <td>
+                    @traspaso.First().AlmacenDestino
+                </td>
+                <td>
+                    @(traspaso.Key.CodArticulo+"/"+traspaso.First().RefProveedor)
+                </td>
+                <td>
+                    @traspaso.First().Descripcion
+                </td>
+                <td>
+                    @traspaso.Sum(s=> s.Cantidad)
+                </td>
+                <td>
+                    @traspaso.First().StockOrigen
+                </td>
+                <td>
+                    @traspaso.First().StockDestino
+                </td>
+            </tr>
+
+            <tr class="@("trDetalleArticulo_" + traspaso.Key.codAlmacenOrigen+ "_" + traspaso.Key.codAlmacenDestino + "_" + traspaso.Key.CodArticulo)" style="display:none;width:auto;" data-origen="@traspaso.Key.codAlmacenOrigen" data-destino="@traspaso.Key.codAlmacenDestino" data-codarticulo="@traspaso.Key.CodArticulo">
+                <td colspan="8" style="padding-left:50px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                   
+                                </th>
+                                <th>
+                                    CodArticulo/Ref
+                                </th>
+                                <th>
+                                    Articulo
+                                </th>
+                                <th>
+                                    Cantidad
+                                </th>
+                                <th>
+                                    Fecha
+                                </th>
+                                <th>
+                                    Usuario
+                                </th>
+                                <th>
+
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var articulo in traspaso.OrderBy(o => o.FechaCreacion))
+                            {
+                                <tr>
+
+                                    <td>
+                                        @if (articulo.codAlmacenDestino == "Y" && articulo.IsExistsTickets.HasValue && articulo.IsExistsTickets.Value)
+                                        {
+                                            <a href="#" data-idmatch="@articulo.IdMatchTiektDevolucion" data-estado="@articulo.Traspasado" data-origen="@articulo.codAlmacenOrigen" data-destino="@articulo.codAlmacenDestino" data-fecha="@articulo.FechaCreacion.ToString("ddMMyyyyHHmmss")" data-codarticulo="@articulo.CodArticulo" data-idmatch="@articulo.IdMatchTiektDevolucion" style="cursor:pointer;" class="verdetalletickets">@(articulo.IdMatchTiektDevolucion.HasValue?"Ver Ticket Match":"Ver Tickets Historico")</a>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @(articulo.CodArticulo+"/"+articulo.RefProveedor)
+                                    </td>
+                                    <td>
+                                        @articulo.Descripcion
+                                    </td>
+                                    <td>
+                                        @articulo.Cantidad
+                                    </td>
+                                    <td>
+                                        @articulo.FechaCreacion
+                                    </td>
+                                   
+                                    <td>
+                                        @(articulo.Usuario == "-1"? "Manager":articulo.Usuario)
+                                    </td>
+                                    <td>
+                                        <a href="#" data-codproveedor="@articulo.codProveedor" data-estado="@articulo.Traspasado" data-codarticulo="@articulo.CodArticulo" data-identificador="@articulo.IdentificadorTraspasoCap" data-idtraspaso="@articulo.IDTraspaso" data-origen="@articulo.codAlmacenOrigen" data-destino="@articulo.codAlmacenDestino" data-articulo="@articulo.CodArticulo" data-fechainicio="@articulo.FechaCreacion.ToString("ddMMyyyyHHmmss")" data-fechafin="@articulo.FechaCreacion.ToString("ddMMyyyyHHmmss")" style="cursor:pointer;" class="modificarTraspaso">Gestionar</a>
+                                    </td>
+
+                                </tr>
+                                <tr class="@("trDetalleTicket_" + articulo.codAlmacenOrigen+ "_" + articulo.codAlmacenDestino + "_" + articulo.FechaCreacion.ToString("ddMMyyyyHHmmss")+ "_" + articulo.CodArticulo)" style="display:none;width:auto;" data-origen="@articulo.codAlmacenOrigen" data-destino="@articulo.codAlmacenDestino" data-fecha="@articulo.FechaCreacion.ToString("ddMMyyyyHHmmss")" data-codarticulo="@articulo.CodArticulo" data-idmatch="@articulo.IdMatchTiektDevolucion">
+                                    <td></td>
+                                    <td colspan="7" style="padding-left:50px;" class="tdcontentDetalleTickets">
+                                    </td>
+                                </tr>
+                                <tr style="height:10px;">
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

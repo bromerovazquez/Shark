@@ -1,0 +1,34 @@
+﻿/* listado.css */
+
+/* Estilo de la tabla */
+.table-container {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: #222;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+    /* Estilo de las celdas */
+    .table-container th, .table-container td {
+        padding: 10px;
+        border-bottom: 1px solid #aaa;
+        text-align: left;
+        color: #fff;
+    }
+
+    /* Estilo de los encabezados de columna */
+    .table-container th {
+        background-color: #007bff;
+        font-weight: bold;
+    }
+
+    /* Estilo de los enlaces */
+    .table-container a {
+        color: #00aaff;
+        text-decoration: none;
+    }
+
+        .table-container a:hover {
+            color: #0088cc;
+        }

@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewData["Title"] = "Albaranes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var AlmacenesList = ViewData["almacenes"] != null?  (List<SelectListItem>)ViewData["almacenes"] : new List<SelectListItem>();
+
+    var albaranes = ViewData["albaranes"] != null ? (List<Drim.Interfaces.MVC.ViewModels.Albaranes>)ViewData["albaranes"] : new List<Drim.Interfaces.MVC.ViewModels.Albaranes>();
+
+}
+
+
+
+<script>
+
+    $(document).ready(function()
+    {
+    
+    
+    });
+
+</script>
+
+
+
+<div style="width:70%">
+@await Html.PartialAsync("~/Views/Shared/Albaranes/FiltersAlbaranes.cshtml",AlmacenesList, new ViewDataDictionary(this.ViewData){ { "divContainerGridAlbaranes","divContainerGridAlbaranes" } })
+</div>
+<br />
+<br />
+<div id="divContainerGridTraspasos">
+
+    @if (albaranes.Any())
+    {
+        @await Html.PartialAsync("~/Views/Shared/Albaranes/AlbaranesAlmacenProveedorGrid.cshtml",albaranes)
+    }
+
+</div>
+
+
+    
+<div class="modal fade" id="modalModificacionTraspasos" tabindex="-1" role="alert" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" >
+            <div class="modal-header" style="background-color:red;color:white">
+                <h5 class="modal-title" id="headTitleModalCrearBaja">Accion Traspaso</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" >
+                <div id="divContentModificarTraspasos">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,537 @@
+﻿@model IEnumerable<Drim.Interfaces.MVC.ViewModels.Traspaso>
+
+@{
+    ViewData["Title"] = "Traspasos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var AlmacenesList = ViewData["almacenes"] != null ? (List<SelectListItem>)ViewData["almacenes"] : new List<SelectListItem>();
+
+    var traspasos = ViewData["traspasos"] != null ? (List<Drim.Interfaces.MVC.ViewModels.TraspasoOrigenDestino>)ViewData["traspasos"] : new List<Drim.Interfaces.MVC.ViewModels.TraspasoOrigenDestino>();
+
+
+    
+
+}
+
+
+
+<script>
+
+    $(document).ready(function()
+    {
+
+
+         $("#divContainerFilterTraspaso").delegate("#tbnBuscarTraspasos","click",function(e){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            BuscarTraspasos();
+        });
+
+
+
+
+        $("#divContainerFilterTraspaso").delegate("#chbIsDescuadreDevoluciones","change",function(e)
+        {
+            console.log("chbIsDescuadreDevoluciones.changed");
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            $("#ddlFilterAlmacenDestino").val("Y");
+            $("#ddlFilterAlmacenDestino").selectpicker('refresh');
+
+            if($(this).is(':checked'))
+            {
+                $('.FiltersDescuadresYTickets').show();
+            }else
+            {
+                $('.FiltersDescuadresYTickets').hide();
+                $('#ddlFiltersDescuadresYTickets').val("");
+
+            }
+
+
+        });
+
+
+    $("#divContainerGridTraspasos").delegate('.verdetalletraspasos',"click",function(e)
+    {
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log("verdetalletraspasos");
+
+        var origen = $(this).data('origen');
+        var destino = $(this).data('destino');
+        var fechaInicio = $(this).data('fechainicio');
+        var fechaFin = $(this).data('fechafin');
+        var estado = $(this).data('estado');
+        var trDetalle = $(".trdetalleTraspasos_" + origen + "_" + destino + "_" + fechaInicio + "_"+ fechaFin + '_' + estado).first();
+        var contentDetalle = trDetalle.find('.tdcontentDetalleTraspasos').first();
+
+
+        console.log($(this).hasClass('activodetalletraspaso'));
+
+        if(!$(this).hasClass('activodetalletraspaso'))
+        {
+            $(this).html("-");
+            trDetalle.show();
+            $(this).addClass('activodetalletraspaso');
+
+        }else
+        {
+
+         $(this).html("+");
+         trDetalle.hide();
+         $(this).removeClass('activodetalletraspaso');
+        }
+
+    });
+
+     $("#divContainerGridTraspasos").delegate('.modificarTraspaso', "click", function (e)
+     {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log('modificarTraspaso');
+
+        var idTraspaso = $(this).data('idtraspaso');
+        var origen= $(this).data('origen');
+        var destino= $(this).data('destino');
+        var fechaInicio= $(this).data('fechainicio');
+        var FechaFin= $(this).data('fechafin');
+        var IdentificadorTraspasoCap= $(this).data('identificador');
+        var codArticulo= $(this).data('codarticulo');
+        var isTraspasado= $(this).data('estado');
+
+
+        console.log($(this).data('estado'));
+
+
+        CargarTraspasosModificacion(idTraspaso,origen,destino,fechaInicio,FechaFin,IdentificadorTraspasoCap,codArticulo,isTraspasado);
+
+
+     });
+
+
+      $("#tabAgregarRegistro").delegate('#ddlAddTipoTraspaso', "change", function (e)
+     {
+
+         var tipo = $(this).val();
+
+         if(tipo=="DevProv")
+         {
+
+             $("#ddlAddTraspasoAlmacenDestino").val("Y");
+             $("#ddlAddTraspasoAlmacenDestino").selectpicker('refresh');
+             $("#txbAddTraspasosZona").val("");
+
+         }
+          if(tipo == "Tienda")
+         {
+
+             $("#ddlAddTraspasoAlmacenDestino").val("");
+             $("#ddlAddTraspasoAlmacenDestino").selectpicker('refresh');
+             $("#txbAddTraspasosZona").val("");
+
+         }
+         if(tipo == "Roturas")
+         {
+
+             $("#ddlAddTraspasoAlmacenDestino").val("Y");
+             $("#ddlAddTraspasoAlmacenDestino").selectpicker('refresh');
+             $("#txbAddTraspasosZona").val("01");
+
+         }
+         else if(tipo=="DevCarnaval")
+         {
+             $("#ddlAddTraspasoAlmacenDestino").val("W1");
+             $("#ddlAddTraspasoAlmacenDestino").selectpicker('refresh');
+             $("#txbAddTraspasosZona").val("");
+         }
+         else if(tipo=="DevHalloween")
+         {
+             $("#ddlAddTraspasoAlmacenDestino").val("W2");
+             $("#ddlAddTraspasoAlmacenDestino").selectpicker('refresh');
+             $("#txbAddTraspasosZona").val("");
+         }
+
+         else if(tipo=="DevVerano")
+         {
+             $("#ddlAddTraspasoAlmacenDestino").val("W3");
+             $("#ddlAddTraspasoAlmacenDestino").selectpicker('refresh');
+             $("#txbAddTraspasosZona").val("");
+         }
+         else if(tipo=="DevPueri")
+         {
+             $("#ddlAddTraspasoAlmacenDestino").val("W4");
+             $("#ddlAddTraspasoAlmacenDestino").selectpicker('refresh');
+             $("#txbAddTraspasosZona").val("");
+         }
+          else if(tipo=="NoConforme")
+         {
+             $("#ddlAddTraspasoAlmacenDestino").val("Y");
+             $("#ddlAddTraspasoAlmacenDestino").selectpicker('refresh');
+             $("#txbAddTraspasosZona").val("");
+         }
+
+         console.log(tipo);
+
+     });
+
+
+
+
+
+                $("#navTraspasos").find('.alink').hover(function (e) {
+                    e.preventDefault();
+                    $("#navTraspasos").find(".alink").removeClass("active");
+                    $(this).addClass("active");
+                    $("#contentTabTraspasos").find(".tab-pane").removeClass("active");
+                    $("#contentTabTraspasos").find("#" + $(this).data("idpanel")).addClass("active");
+
+
+
+                });
+
+
+
+
+                 $("#tbnAgregarTraspasos").on("click",function()
+                 {
+
+
+                     var tipo = $("#ddlAddTipoTraspaso").val();
+                     var origen = $("#ddlAddTraspasoAlmacenOrigen").val();
+                     var destino  = $("#ddlAddTraspasoAlmacenDestino").val();
+                     var fecha  = $("#dataAddTraspasoFecha").val();
+                     var codarticulo  = $("#ddlAddArticulo").val();
+                     var cantidad = $("#txbAddTraspasosCantidad").val();
+                     var zona = $("#txbAddTraspasosZona").val();
+
+
+                     var contentDetalle = "divContentAgregarTraspasos";
+
+                    if(tipo.length==0)
+                    {
+                        alert("Debe de seleccionar el tipo de traspaso.");
+                        return;
+                    }
+
+                    if(origen.length==0)
+                    {
+                        alert("Debe de seleccionar el Almacen Origen.");
+                        return;
+                    }
+
+                    if(destino.length==0)
+                    {
+                        alert("Debe de seleccionar el Almacen Destino.");
+                        return;
+                    }
+                     if(fecha.length==0)
+                    {
+                        alert("Debe de especificar la Fecha.");
+                        return;
+                    }
+
+                    if(codarticulo.length==0)
+                    {
+                        alert("Debe de seleccionar un articulo.");
+                        return;
+                    }
+
+                    if(cantidad.length==0)
+                    {
+                        alert("Debe de especificar la cantidad.");
+                        return;
+                    }
+
+
+
+                     GetAgregarTraspasosValidate(origen,destino,fecha,codarticulo,cantidad,zona,tipo,contentDetalle);
+
+                 });
+
+
+                $("#divContentAgregarTraspasos").delegate('#tbnAgregarTraspasosOK', "click", function (e)
+                {
+
+                     var tipo = $(this).data('tipo');
+                     var origen = $(this).data('codalmacenorigen');
+                     var destino  = $(this).data('codalmacendestino');
+                     var fecha  = $(this).data('fecha');
+                     var codarticulo  = $(this).data('codarticulo');
+                     var cantidad = $(this).data('cantidad');
+                     var zona =  $(this).data('zona');
+
+                     AgregarTraspasosOK(origen,destino,fecha,codarticulo,cantidad,zona,tipo);
+
+                });
+
+
+
+
+
+    });
+
+
+     var CargarTraspasosModificacion = function(idTraspaso,origen,destino,fechaInicio,fechaFin,IdentificadorTraspasoCap,codArticulo,isTraspasado)
+     {
+
+          console.log('CargarTraspasosModificacion');
+         console.log(isTraspasado);
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetTraspasosModificacion","Traspasos")' + "?id="+idTraspaso+"&codAlmacenOrigen=" + origen + "&codAlmacenDestino=" + destino + "&fechaInicio=" + fechaInicio+ "&fechaFin=" + fechaFin + "&identificadorTraspasoCap=" + IdentificadorTraspasoCap +"&codArticulo="+codArticulo + "&IsTraspasado=" + isTraspasado,
+            success: function (data)
+            {
+                $("#divModalLoading").modal("hide");
+                $("#modalModificacionTraspasos").modal('show');
+                $("#divContentModificarTraspasos").html(data);
+            },
+            beforeSend: function (e) {
+                $("#divModalLoading").modal("show");
+                $("#divContentModificarTraspasos").html("");
+            }
+        });
+     };
+
+
+      var GetDetalleTraspasos = function(origen,destino,fecha,estado,contentDetalle)
+    {
+
+
+         $.ajax({
+         type: 'GET',
+         url: '@Url.Action("GetTraspasosDetalle","Traspasos")' + "?codAlmacenOrigen=" + origen + "&codAlmacenDestino=" + destino + "&fecha=" + fecha  + "&estado=" + estado,
+         success: function (data)
+         {
+             $("#divModalLoading").modal("hide");
+             contentDetalle.html(data);
+         },
+         beforeSend: function (e) {
+             $("#divModalLoading").modal("show");
+             contentDetalle.html("");
+         }
+     });
+
+
+    };
+
+
+
+     var BuscarTraspasos = function()
+    {
+
+     var codAlmacenOrigen = $("#ddlFilterAlmacenOrigen").val();
+     var codAlmacenDestino = $("#ddlFilterAlmacenDestino").val();
+
+     var fechaInicio = $("#txbFilterFechaInicio").val();
+     var fechaFin = $("#txbFilterFechaFin").val();
+     var estado = $("#ddlFilterEstadoTraspaso").val();
+
+     var codArticulo = $("#ddlFilterArticulo").val();
+
+
+
+     var containerResult = $("#hidContainerGridResult").val();
+
+     var IsCuadreTicketDevolucion =  $("#chbIsDescuadreDevoluciones").is(':checked');
+
+
+     var DescuadresYTickets =  $("#ddlFiltersDescuadresYTickets").val();
+
+
+
+      if(fechaInicio.length ==0)
+        {
+        alert("Debes de introducir la fecha inicio");
+        return;
+        }
+        if(fechaFin.length ==0)
+        {
+        alert("Debes de introducir la fecha fin");
+        return;
+        }
+
+
+
+        $.ajax({
+
+            type: 'GET',
+            url: '@Url.Action("GetTraspasos","Traspasos")' + "?codAlmacenOrigen=" + codAlmacenOrigen + "&codAlmacenDestino=" + codAlmacenDestino + "&fechaInicio=" + fechaInicio + "&fechaFin=" + fechaFin + "&estado=" + estado  + "&codArticulo=" + codArticulo  + "&IsCuadreTicketDevolucion=" + IsCuadreTicketDevolucion + "&DescuadresYTickets="+ DescuadresYTickets,
+            success: function (data)
+            {
+                if(data.result!= null && data.result =="NOK")
+                {
+
+                }
+
+                $("#divModalLoading").modal("hide");
+                $("#" + containerResult).html(data);
+            },
+            beforeSend: function (e) {
+                $("#divModalLoading").modal("show");
+                $("#" + containerResult).html("");
+            }
+        });
+    };
+
+
+
+    var GetAgregarTraspasosValidate = function(origen,destino,fecha,codarticulo,cantidad,zona,tipo,contentDetalle)
+    {
+
+
+        console.log('GetAgregarTraspasosValidate');
+
+         $.ajax({
+         type: 'GET',
+         url: '@Url.Action("GetAgregarTraspasosValidate","Traspasos")' + "?codAlmacenOrigen=" + origen + "&codAlmacenDestino=" + destino + "&fecha=" + fecha + "&tipo=" + tipo  + "&codarticulo=" + codarticulo + "&cantidad=" + cantidad +"&zona=" + zona,
+         success: function (data)
+         {
+             $("#divModalLoading").modal("hide");
+             $("#"+contentDetalle).html(data);
+             $("#modalAddTraspasos").modal("show");
+         },
+         beforeSend: function (e) {
+
+             $("#divModalLoading").modal("show");
+             $("#"+contentDetalle).html("");
+         }
+     });
+
+
+    };
+
+
+     var AgregarTraspasosOK = function(origen,destino,fecha,codarticulo,cantidad,zona,tipo)
+    {
+
+
+         $.ajax({
+         type: 'POST',
+         url: '@Url.Action("AgregarTraspasosValidate","Traspasos")' ,
+         data:{ "codAlmacenOrigen": origen , "codAlmacenDestino": destino , "fecha": fecha , "tipo": tipo  , "codarticulo" : codarticulo ,"cantidad": cantidad , "zona": zona},
+         success: function (data)
+         {
+             $("#divModalLoading").modal("hide");
+
+             if(data.result == "NOK")
+             {
+                alert(data.mensaje);
+
+             }else
+             {
+                 alert("Se ha creado el traspaso correctemante.");
+             }
+         },
+         beforeSend: function (e) {
+             $("#divModalLoading").modal("show");
+         }
+     });
+
+
+    };
+
+
+</script>
+
+
+
+
+
+
+
+
+
+<ul id="navTraspasos" class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link alink active" id="pestanaFiltros" data-idpanel="tabFiltros">Filtros</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link alink" id="pestanaAgregarRegistro" data-idpanel="tabAgregarRegistro">Agregar Registro</a>
+    </li>
+</ul>
+
+
+
+<div class="accordion" id="accordionTraspasos">
+    <div class="card">
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionTraspasos">
+            <div class="card-body">
+
+                <div id="contentTabTraspasos" class="tab-content clearfix">
+
+                    <div class="tab-pane active" id="tabFiltros">
+
+
+                        <div id="divContainerFilterTraspaso" style="width:70%">
+                            @await Html.PartialAsync("~/Views/Shared/Traspasos/FiltersTraspasos.cshtml",AlmacenesList, new ViewDataDictionary(this.ViewData){ { "divContainerGridTraspasos","divContainerGridTraspasos" },{ "IsIncidencias",true } })
+                        </div>
+                        <br />
+                        <br />
+                        <div id="divContainerGridTraspasos">
+
+                            @if (traspasos.Any())
+                            {
+                                @await Html.PartialAsync("~/Views/Shared/Traspasos/TraspasoOrigenDestinoGrid.cshtml",traspasos)
+                            }
+
+                        </div>
+
+
+                    </div>
+
+                    <div class="tab-pane" id="tabAgregarRegistro">
+                        <div id="divContainerFilterTraspaso" style="width:70%">
+                            @await Html.PartialAsync("~/Views/Shared/Traspasos/AddTraspasos.cshtml",AlmacenesList, new ViewDataDictionary(this.ViewData){ { "divContainerGridTraspasos","divContainerGridTraspasos" } })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<div class="modal fade" id="modalModificacionTraspasos" tabindex="-1" role="alert" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:red;color:white">
+                <h5 class="modal-title" id="headTitleModalCrearBaja">Accion Traspaso</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="divContentModificarTraspasos">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="modalAddTraspasos" tabindex="-1" role="alert" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:red;color:white">
+                <h5 class="modal-title" id="headTitleModalCrearBaja">Agregar Traspaso</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="divContentAgregarTraspasos">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

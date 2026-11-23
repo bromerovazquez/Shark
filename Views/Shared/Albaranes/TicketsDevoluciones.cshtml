@@ -1,0 +1,95 @@
+﻿@using Drim.Interfaces.MVC.Entities
+@model List<TiketsDevoluciones>
+
+    @{
+
+    var idMatch = ViewData["idMatch"] != null ? (long)ViewData["idMatch"] : 0;
+
+}
+
+
+
+<style>
+
+
+    .isMatch
+    {
+    background-color:green;
+    }
+
+    .isMatchOther
+    {
+    background-color:blue;
+    color:white;
+    }
+
+
+</style>
+
+
+
+@if (Model.Any())
+{
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Almacen</th>
+                    <th>Vendedor</th>
+                    <th>codArticulo</th>
+                    <th>Cantidad</th>
+                    <th>Fecha</th>
+                    <th>Cantidad Restada</th>
+                    <th>Fecha Traspaso</th>
+
+                </tr>
+            </thead>
+            <tbody>
+
+            @foreach (var ticket in Model.OrderByDescending(x => x.Fecha))
+            {
+                        <tr>
+                            <td>
+
+                                <i class="fa fa-receipt"></i>
+
+                            </td>
+                            <td>
+                        @ticket.NombreAlmacen
+                            </td>
+                            <td>
+                        @ticket.NombreVendedor
+                            </td>
+                            <td>
+                        @ticket.codArticulo
+                            </td>
+                            <td>
+                        @ticket.Unidades
+                            </td>
+                            <td>
+                        @ticket.Fecha.ToString("dd/MM/yyyy HH:mm:ss")
+                            </td>
+                            <td>
+                        @ticket.CantidadRestante
+                            </td>
+                            <td class="@(ticket.IdMatch != 0 && ticket.IdMatch == idMatch  ? "isMatch":ticket.IdMatch != 0?"isMatchOther":""   )">
+                        @(ticket.FechaTraspaso.HasValue? ticket.FechaTraspaso.Value.ToString("dd/MM/yyyy HH:mm:ss"):"")
+                            </td>
+                        </tr>
+            }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="8">
+                        <a style="cursor:pointer;" href="">Ver todos los traspasos y ticekts del articulo en la tienda</a>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+}
+else
+{
+        <p>No se encontraton Tickets</p>
+}   
+
+

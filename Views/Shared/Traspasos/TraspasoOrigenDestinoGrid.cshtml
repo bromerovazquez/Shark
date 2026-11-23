@@ -1,0 +1,68 @@
+﻿@model List<Drim.Interfaces.MVC.ViewModels.TraspasoOrigenDestino>
+
+
+
+
+
+@if (!Model.Any()) 
+{
+
+    <p style="color:red;font-style:italic;">Sin Resultados</p>
+
+}else{
+
+    <p style="color:blue;font-style:italic;">Total Traspasados: @Model.Sum(s=> s.Traspasos.Where(x=> x.Traspasado).Count()) </p>
+    <p style="color:blue;font-style:italic;">Total Pendientes: @Model.Sum(s=> s.Traspasos.Where(x=> !x.Traspasado).Count()) </p>
+    <br />
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Dia</th>
+            <th>Total Articulos</th>
+            <th>Estado</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var traspaso in Model.OrderBy(x => x.CodAlmacenOrigen).ThenBy(x => x.FechaInicio))
+        {
+            <tr data-origen="@traspaso.CodAlmacenOrigen" data-destino="@traspaso.CodAlmacenDestino" data-fechainicio="@traspaso.FechaInicio.ToString("ddMMyyyyHHmm")" data-fechafin="@traspaso.FechaFin.ToString("ddMMyyyyHHmm")">
+                <td>
+                    <a href="#" data-origen="@traspaso.CodAlmacenOrigen" data-destino="@traspaso.CodAlmacenDestino" data-estado="@traspaso.IsTraspasados" data-fechainicio="@traspaso.FechaInicio.ToString("ddMMyyyyHHmm")" data-fechafin="@traspaso.FechaFin.ToString("ddMMyyyyHHmm")" style="cursor:pointer;" class="verdetalletraspasos">+</a>
+                </td>
+                <td>
+                    @traspaso.AlmacenOrigen
+                </td>
+                <td>
+                    @traspaso.AlmacenDestino
+                </td>
+                <td>
+                    @traspaso.FechaInicio.ToString("dd/MM/yyyy")
+                </td>
+                <td>
+                    @traspaso.TotalArticulos
+                </td>
+                <td>
+                    @(traspaso.IsTraspasados?"Traspasado":"Pendiente")
+                </td>
+                <td>
+                    <a href="#" data-codproveedor="@traspaso.codProveedor"  data-estado="@traspaso.IsTraspasados" data-codarticulo="0" data-identificador="" data-idtraspaso="0" data-origen="@traspaso.CodAlmacenOrigen" data-destino="@traspaso.CodAlmacenDestino"  data-fechainicio="@traspaso.FechaInicio.ToString("ddMMyyyyHHmm")" data-fechafin="@traspaso.FechaFin.ToString("ddMMyyyyHHmm")" style="cursor:pointer;" class="modificarTraspaso">Gestionar</a>
+                </td>
+            </tr>
+            <tr class="@("trdetalleTraspasos_" + traspaso.CodAlmacenOrigen+ "_" + traspaso.CodAlmacenDestino + "_" + @traspaso.FechaInicio.ToString("ddMMyyyyHHmm")+"_"+ @traspaso.FechaFin.ToString("ddMMyyyyHHmm") + "_" +  @traspaso.IsTraspasados)" style="display:none;width:auto;" data-origen="@traspaso.CodAlmacenOrigen" data-destino="@traspaso.CodAlmacenDestino" data-fechainicio="@traspaso.FechaInicio.ToString("ddMMyyyyHHmm")" data-fechafin="@traspaso.FechaFin.ToString("ddMMyyyyHHmm")" >
+                <td></td>
+                <td colspan="6" style="padding-left:50px;" class="tdcontentDetalleTraspasos">
+
+                    @await Html.PartialAsync("~/Views/Shared/Traspasos/TraspasoOrigenDestinoDetalleGrid.cshtml",traspaso.Traspasos)
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+}

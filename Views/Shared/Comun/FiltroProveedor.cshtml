@@ -1,0 +1,37 @@
+﻿@{
+    var colLabel = ViewData["colLabel"] != null ?  (string)ViewData["colLabel"]:"col-6";
+    var colSelect = ViewData["colSelect"] != null ?  (string)ViewData["colSelect"]:"col-6";
+    var valueProveedor = ViewData["valueProveedor"] != null ?  (string)ViewData["valueProveedor"]:"";
+    var isSearchServer = ViewData["isSearchServer"] != null ?  (string)ViewData["isSearchServer"]:"true";
+    var provedoresList = ViewData["proveedores"] != null ?  (List<SelectListItem>)ViewData["proveedores"]: null;
+
+}
+
+
+<label class="@colLabel col-form-label drim-label">Proveedor:</label>
+
+<div class="@colSelect">
+    <select class="selectpicker form-control filterproveedor" id="ddlFilterProveedor"
+          data-allow-clear="true"
+            data-container="body"
+            data-live-search="true"
+            title="Buscar Articulo"
+            data-hide-disabled="true"
+            data-actions-box="true"
+    >
+
+
+        @foreach (var proveedor in provedoresList)
+        {
+                @if (!string.IsNullOrEmpty(valueProveedor) && proveedor.Value == valueProveedor)
+                {
+                    <option selected="selected" value="@proveedor.Value">@proveedor.Text</option>
+                }else
+                {
+                    <option value="@proveedor.Value">@proveedor.Text</option>
+                }
+
+        }
+
+    </select>
+</div>

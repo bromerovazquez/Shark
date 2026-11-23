@@ -1,0 +1,28 @@
+﻿ @{
+    var AlmacenesList = ViewData["almacenes"] != null?  (List<SelectListItem>)ViewData["almacenes"] : new List<SelectListItem>();
+    var LabelFechaInicio = ViewData["LabelFechaInicio"] != null ?  (string)ViewData["LabelFechaInicio"]:"Fecha Inicio";
+    var LabelFechaFin = ViewData["LabelFechaFin"] != null ?  (string)ViewData["LabelFechaFin"]:"Fecha Fin";
+
+    var IdFechaInicio = ViewData["IdFechaInicio"] != null ?  (string)ViewData["IdFechaInicio"]:"txbFilterFechaInicio";
+    var IdFechaFin = ViewData["IdFechaFin"] != null ?  (string)ViewData["IdFechaFin"]:"txbFilterFechaFin";
+    
+    var ValueFechaInicio = ViewData["ValueFechaInicio"] != null ?  ((DateTime)ViewData["ValueFechaInicio"]).ToString("yyyy-MM-ddTHH:mm:ss"):"";
+    var ValueFechaFin = ViewData["ValueFechaFin"] != null ? ((DateTime)ViewData["ValueFechaFin"]).ToString("yyyy-MM-ddTHH:mm:ss"):"";
+
+     var colLabel = ViewData["colLabel"] != null ?  (string)ViewData["colLabel"]:"col-6";
+    var colSelect = ViewData["colSelect"] != null ?  (string)ViewData["colSelect"]:"col-6";
+
+    var onlyreadFechaInicio = ViewData["onlyreadFechaInicio"] != null ?  (bool)ViewData["onlyreadFechaInicio"]:false;
+    var onlyreadFechaFin = ViewData["onlyreadFechaFin"] != null ?  (bool)ViewData["onlyreadFechaFin"]:false;
+
+}
+
+
+<label class="@colLabel col-form-label drim-label">@LabelFechaInicio:</label>
+<div class="@colSelect">
+    <input type="datetime-local" @(onlyreadFechaInicio?"readonly":"") id="@IdFechaInicio" value="@ValueFechaInicio" class="form-control" />
+</div>
+<label class="@colLabel col-form-label drim-label">@LabelFechaFin:</label>
+<div class="@colSelect">
+    <input type="datetime-local" @(onlyreadFechaFin?"readonly":"") id="@IdFechaFin" value="@ValueFechaFin"  class="form-control" />
+</div>

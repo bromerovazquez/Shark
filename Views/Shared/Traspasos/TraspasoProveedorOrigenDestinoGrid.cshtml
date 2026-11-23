@@ -1,0 +1,67 @@
+﻿@model List<Drim.Interfaces.MVC.ViewModels.TraspasoOrigenDestino>
+
+
+
+@if (!Model.Any()) 
+{
+
+    <p style="color:red;font-style:italic;">Sin Resultados</p>
+
+}else{
+   
+    <br />
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Proveedor</th>
+            <th>Almacen Origen</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Total Articulos</th>
+            <th>Total Unidades</th>
+        </tr>
+    </thead>
+    <tbody>
+
+            @foreach (var traspasoProveedorDia in Model.OrderBy(x => x.codProveedor).ThenBy(x => x.CodAlmacenOrigen))
+            {
+            <tr data-codproveedor="@traspasoProveedorDia.codProveedor" data-origen="@traspasoProveedorDia.CodAlmacenOrigen" data-fechainicio="@traspasoProveedorDia.FechaInicio.ToString("ddMMyyyyHHmmss")" data-fechafin="@traspasoProveedorDia.FechaFin.ToString("ddMMyyyyHHmmss")">
+                <td>
+                    <a href="#" data-codproveedor="@traspasoProveedorDia.codProveedor" data-fechainicio="@traspasoProveedorDia.FechaInicio.ToString("ddMMyyyyHHmmss")" data-fechafin="@traspasoProveedorDia.FechaFin.ToString("ddMMyyyyHHmmss")" style="cursor:pointer;" class="verdetalletraspasosproveedor">+</a>
+                </td>
+
+                <td>
+                    @(traspasoProveedorDia.codProveedor +"-"+traspasoProveedorDia.NombreProveedor)
+                </td>
+
+                <td>
+                    @traspasoProveedorDia.AlmacenOrigen
+                </td>
+                <td>
+                    @traspasoProveedorDia.FechaInicio.ToString("dd/MM/yyyy HH:mm:ss")
+                </td>
+                <td>
+                    @traspasoProveedorDia.FechaFin.ToString("dd/MM/yyyy HH:mm:ss")
+                </td>
+                <td>
+                    @traspasoProveedorDia.TotalArticulos
+                </td>
+                <td>
+                    @traspasoProveedorDia.TotalUnidades
+                </td>
+                <td>
+                    <a href="#"  data-codproveedor="@traspasoProveedorDia.codProveedor" data-fechainicio="@traspasoProveedorDia.FechaInicio.ToString("ddMMyyyyHHmmss")" data-fechafin="@traspasoProveedorDia.FechaFin.ToString("ddMMyyyyHHmmss")" data-origen="@traspasoProveedorDia.CodAlmacenOrigen" data-destino="" data-codarticulo="0" style="cursor:pointer;" class="modificarTraspaso">Gestionar</a>
+                </td>
+            </tr>
+            <tr class="@("trdetalleTraspasos_" + traspasoProveedorDia.codProveedor+ "_" + traspasoProveedorDia.FechaInicio.ToString("ddMMyyyyHHmmss")+ "_" + traspasoProveedorDia.FechaFin.ToString("ddMMyyyyHHmmss"))" style="display:none;width:auto;" data-codproveedor="@traspasoProveedorDia.codProveedor" data-fechainicio="@traspasoProveedorDia.FechaInicio.ToString("ddMMyyyyHHmmss")" data-fechafin="@traspasoProveedorDia.FechaFin.ToString("ddMMyyyyHHmmss")">
+                <td></td>
+                <td colspan="6" style="padding-left:50px;" class="tdcontentDetalleTraspasosProveedor">
+                     @await Html.PartialAsync("~/Views/Shared/Traspasos/TraspasoOrigenDestinoDetalleGrid.cshtml",traspasoProveedorDia.Traspasos)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+}

@@ -1,0 +1,228 @@
+﻿@model Drim.Interfaces.MVC.ViewModels.TraspasosModificacion
+
+@{
+    var AlmacenesList = ViewData["almacenes"] != null ? (List<SelectListItem>)ViewData["almacenes"] : new List<SelectListItem>();
+
+
+}
+
+
+<script>
+
+
+    $(document).ready(function()
+    {
+
+        $("#ddlTipoModificacion").on("change",function(e)
+        {
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log("ddlTipoModificacion.changed");
+
+        if($(this).val() == "cambioDestino")
+        {
+            $("#ddlAlmacenOrigenModificacion").val($("#hOrigenModificacion").val());
+            $("#ddlAlmacenOrigenModificacion").selectpicker('refresh');
+
+            $("#ddlAlmacenDestinoModificacion").val($("#hDestinoModificacion").val());
+            $("#ddlAlmacenDestinoModificacion").prop("disabled", false);
+            $("#ddlAlmacenDestinoModificacion").selectpicker('refresh');
+        }
+        else
+        {
+
+            console.log($("#hOrigenModificacion").val());
+            console.log($("#hDestinoModificacion").val());
+
+            $("#ddlAlmacenOrigenModificacion").val($("#hDestinoModificacion").val());
+            $("#ddlAlmacenDestinoModificacion").val($("#hOrigenModificacion").val());
+            $("#ddlAlmacenDestinoModificacion").prop("disabled", true);
+
+            $("#ddlAlmacenOrigenModificacion").selectpicker('refresh');
+            $("#ddlAlmacenDestinoModificacion").selectpicker('refresh');
+        }
+
+        });
+
+        $("#btnModificacionTraspasos").on("click",function(e)
+        {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            var idTraspaso = $(this).data('id');
+            var fechainicio = $(this).data('fechainicio');
+            var fechafin = $(this).data('fechafin');
+            var origen = $(this).data('origen');
+            var destino = $(this).data('destino');
+
+            var origenNuevo = $("#ddlAlmacenOrigenModificacion").val();
+            var destinoNuevo = $("#ddlAlmacenDestinoModificacion").val();
+
+            var tipo = $("#ddlTipoModificacion").val();
+
+            var estado = $(this).data('estado');
+
+            var identificador = $(this).data('identificador');
+
+            var codarticulo = $(this).data('codarticulo');
+
+            var cantidad = $(this).data('cantidad');
+
+
+            console.log($(this).data('estado'));
+
+
+            if(origenNuevo.length == 0 )
+            {
+                 alert("Debe de especificar el almacen origen");
+                return false;
+            }
+
+            if(destinoNuevo.length == 0)
+            {
+                 alert("Debe de especificar el almacen destino");
+                return false;
+            }
+
+
+            if(origenNuevo == destinoNuevo)
+            {
+            
+                alert("El alman destino no puede ser igual al almacen destino");
+                return false;
+            }
+
+
+            if(tipo=="cambioDestino")
+            {
+                
+                if(origenNuevo != origen)
+                {
+                    alert("El almacen origen no puede ser distinto al traspaso original");
+                    return false;
+                }
+
+                if(destinoNuevo == destino)
+                {
+                    alert("El almacen destino no puede ser igual al traspaso original");
+                    return false;
+                }
+            
+            }else
+            {
+                if(destinoNuevo != origen)
+                {
+                    alert("El almacen destino debe de ser igual al origen del traspaso original");
+                    return false;
+                }
+
+                if(origenNuevo != destino)
+                {
+                    alert("El almacen origen debe de ser igual al destino del traspaso original");
+                    return false;
+                }
+            
+            }
+
+
+            $.ajax({
+            type: 'POST',
+            url: '@Url.Action("ModificacionTraspasos","Traspasos")',
+            data: { "codAlmacenOrigen": origen , "codAlmacenDestino":  destino , "fechainicio": fechainicio, "fechafin":fechafin, "origenNuevo": origenNuevo , "destinoNuevo":destinoNuevo , "tipo": tipo , "idTraspaso": idTraspaso , "IsTraspasado":  estado , "identificador":  identificador , "codarticulo":  codarticulo , "cantidad": cantidad  },
+            success: function (data)
+            {
+                $("#divModalLoading").modal("hide");
+
+                if(data.result=="OK")
+                {
+                    alert("Se proceso correctamente");
+                }else
+                {
+                    alert(data.mensaje);
+                }
+
+                $("#modalModificacionTraspasos").modal('hide');
+                BuscarTraspasos();
+            },
+            beforeSend: function (e) {
+                $("#divModalLoading").modal("show");
+            }
+            });
+
+
+
+        });
+
+
+
+    });
+
+</script>
+
+
+<div class="row form-group mt-2">
+    <label class="col-3 col-form-label drim-label">Accion:</label>
+    <div class="col-3">
+        <select class="form-control" style="width:200px;" id="ddlTipoModificacion">
+            <option selected="selected" value="cambioDestino">Cambio Destino</option>
+            <option value="inversa">Invertir</option>
+        </select>
+    </div>
+</div>
+<div class="row form-group mt-2">
+    @await Html.PartialAsync("~/Views/Shared/Comun/FiltroAlmacen.cshtml",AlmacenesList, new ViewDataDictionary(this.ViewData){{ "LabelAlmacen","Origen" },{"IdAlmacen","ddlAlmacenOrigenModificacion"},{"value",Model.codAlmacenOrigen},{"onlyread",true},{"colLabel","col-3"},{"colSelect","col-3"}})
+    <input type="hidden" id="hOrigenModificacion" value="@Model.codAlmacenOrigen" />
+    @await Html.PartialAsync("~/Views/Shared/Comun/FiltroAlmacen.cshtml",AlmacenesList, new ViewDataDictionary(this.ViewData){{ "LabelAlmacen","Destino" },{"IdAlmacen","ddlAlmacenDestinoModificacion"},{"value",Model.codAlmacenDestino},{"onlyread",false},{"colLabel","col-3"},{"colSelect","col-3"}})
+    <input type="hidden" id="hDestinoModificacion" value="@Model.codAlmacenDestino" />
+</div>
+<div class="row form-group mt-2">
+   @await Html.PartialAsync("~/Views/Shared/Comun/FiltroRangoFechas.cshtml", new  ViewDataDictionary(this.ViewData){ {"colLabel","col-3"},{"colSelect","col-3"},{"onlyreadFechaInicio",true},{"onlyreadFechaFin",true},{"ValueFechaInicio",Model.FechaInicio},{"ValueFechaFin",Model.FechaFin}})
+</div>
+
+
+
+@if (Model.codArticulo != 0)
+{
+    <div class="row form-group mt-2">
+        <label class="col-3 col-form-label drim-label">Articulo:</label>
+        <div class="col-3">
+            <label id="lblCodArticuloModificacion">@Model.NombreArticulo </label>
+            <input type="hidden" id="hCodArticuloModificacion" value="@Model.codArticulo" />
+        </div>
+    
+    <label class="col-3 col-form-label drim-label">Cantidad:</label>
+    <div class="col-3">
+        <label id="lblCantidadModificacion">@Model.Cantidad </label>
+        <input type="hidden" id="hCantidadModificacion" value="@Model.Cantidad" />
+    </div>
+    </div>
+}else
+{
+     <div class="row form-group mt-2">
+    <label class="col-3 col-form-label drim-label">Total Articulos:</label>
+    <div class="col-3">
+        <label id="lblCantidadModificacion">@Model.Cantidad </label>
+        <input type="hidden" id="hCantidadModificacion" value="@Model.Cantidad" />
+    </div>
+    </div>
+    
+}
+
+<div class="row form-group mt-2">
+    <div class="col-12">
+        <input type="button" style="width:400px;" value="Ejecutar" class="btn btn-primary" 
+        data-estado="@Model.IsTraspasado" 
+        data-origen="@Model.codAlmacenOrigen" 
+        data-destino="@Model.codAlmacenDestino" 
+        data-fechainicio="@Model.FechaInicio.ToString("ddMMyyyyHHmm")" 
+        data-fechafin="@Model.FechaFin.ToString("ddMMyyyyHHmm")" 
+        data-id="@Model.IdTraspaso" 
+        data-codarticulo="@Model.codArticulo" 
+        data-identificador="@Model.IdentificadorTraspasoCap" 
+        data-cantidad="@Model.Cantidad" 
+        id="btnModificacionTraspasos" />
+    </div>
+</div>
+
+

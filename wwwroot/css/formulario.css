@@ -1,0 +1,70 @@
+﻿/* formulario-archivo.css */
+
+/* Estilo general del formulario */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #111;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    left:10%
+}
+
+/* Estilo de etiquetas de campo */
+.form-floating label {
+    font-weight: bold;
+    color: #fff;
+}
+
+/* Estilo de campos de entrada */
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #222;
+    color: #fff;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .form-control:focus {
+        background-color: #333;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+/* Estilo de botón de enviar */
+.btn-primary {
+    background-color: #00aaff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-primary:hover {
+        background-color: #0088cc;
+    }
+
+/* Estilo de filas y columnas */
+.row {
+    margin-bottom: 15px;
+}
+
+.col-md {
+    flex: 1;
+    margin-right: 10px;
+}
+
+/* Estilo de espaciado entre filas */
+.g-2 {
+    gap: 10px;
+}
+
+/* Estilo de separación entre filas */
+.row-spacing {
+    margin-bottom: 20px;
+}

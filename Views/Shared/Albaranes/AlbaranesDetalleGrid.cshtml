@@ -1,0 +1,50 @@
+﻿@model List<Drim.Interfaces.MVC.ViewModels.Traspaso>
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>codArticulo/Ref</th>
+                <th>Descrpicion</th>
+                <th>Cantidad</th>
+                <th>Fecha</th>
+                <th>Traspasado</th>
+                <th>Usuario</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach(var traspaso in Model.OrderBy(x=> x.FechaCreacion))
+            {
+            <tr>
+                <td>
+                    @(traspaso.CodArticulo+"/"+traspaso.RefProveedor)
+                </td>
+                <td>
+                    @traspaso.Descripcion
+                </td>
+                <td>
+                    @traspaso.Cantidad
+                </td>
+                <td>
+                    @traspaso.FechaCreacion
+                </td>
+                <td>
+                    @traspaso.Traspasado
+                </td>
+                <td>
+                    @(traspaso.Usuario == "-1"? "Manager":traspaso.Usuario)
+                </td>
+                <td>
+                   <a href="#" data-estado="@traspaso.Traspasado" data-codarticulo="@traspaso.CodArticulo" data-identificador="@traspaso.IdentificadorTraspasoCap" data-idtraspaso="@traspaso.IDTraspaso" data-origen="@traspaso.codAlmacenOrigen" data-destino="@traspaso.codAlmacenDestino" data-articulo="@traspaso.CodArticulo" data-fechainicio="@traspaso.FechaCreacion.ToString("ddMMyyyyHHmm")" data-fechafin="@traspaso.FechaCreacion.ToString("ddMMyyyyHHmm")" style="cursor:pointer;" class="modificarTraspaso">Gestionar</a>
+                </td>
+            </tr>
+            <tr style="height:10px;">
+
+            </tr>
+            }
+        </tbody>
+    </table>
+

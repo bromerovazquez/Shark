@@ -1,0 +1,95 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using Drim.Interfaces.MVC.ViewModels;
+@using Drim.Interfaces.MVC.Entities;
+
+@inject IHttpContextAccessor _httpContextAccessor
+@{
+
+    var menuRolList = _httpContextAccessor.HttpContext.Session.GetObjectFromJson<List<MenuRol>>("menuUserRol");
+    var IsProduccion = _httpContextAccessor.HttpContext.Session.GetObjectFromJson<bool>("IsProduccion");
+    List<MenuRol> menuPadre = menuRolList.Where(x => (x.IsMenuPrincipal.HasValue && x.IsMenuPrincipal.Value)).ToList();
+    List<MenuRol> SubMenus = menuRolList.Where(x => (x.IsSubMenuPrincipal.HasValue && x.IsSubMenuPrincipal.Value)).ToList();
+}
+
+
+
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion " id="accordionSidebar">
+
+     @if (!IsProduccion)
+    {
+        <div style="background-color:red;font-size:15px;font-weight:bold;color:white" class="sidebar-heading mt-2">
+            ENTORNO DE PRUEBAS
+        </div>
+    }
+
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="~/Empleado">
+        <div class="sidebar-brand-text mx-3">
+            <img id="LogoDrim" alt="Drim" src="https://drimjuguetes.vteximg.com.br/arquivos/drim-logo-web.png" width="150px" />
+        </div>
+    </a>
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
+    <!-- Heading -->
+    @if (IsProduccion)
+    {
+        <div class="sidebar-heading mt-2">
+            Orquestador
+        </div>
+    }
+    else
+    {
+        <div style="background-color:red;font-size:15px;font-weight:bold;color:white" class="sidebar-heading mt-2">
+            ENTORNO DE PRUEBAS
+        </div>
+    }
+    <!-- Nav Item  -->
+
+    @foreach (var menu in menuPadre.OrderBy(x => x.OrderDisplay))
+    {
+        var isSubmenu = SubMenus.Where(x => x.IdPaginaPadre == menu.IdPagina).Any();
+
+        <li class="nav-item">
+
+            @if (isSubmenu)
+            {
+                <a class="nav-link" href="@Url.Action(menu.Action, menu.Controller)" data-toggle="collapse" data-target="@("#collapse_" + menu.IdPagina)" aria-expanded="true" aria-controls="@("collapse_" + menu.IdPagina)">
+                    <i class="@menu.Icono"></i>
+                    <span>@menu.DisplayText</span>
+                </a>
+
+                <div id="@("collapse_" + menu.IdPagina)" class="collapse" aria-labelledby="@menu.Pagina" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        @foreach (var submenu in SubMenus.Where(x => x.IdPaginaPadre == menu.IdPagina).OrderBy(x => x.OrderDisplay))
+                        {
+                            <a class="collapse-item" href="@Url.Action(submenu.Action, submenu.Controller)">
+                                <i class="@submenu.Icono"></i>
+
+                                @submenu.DisplayText
+                                </a>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <a class="nav-link" href="@Url.Action(menu.Action, menu.Controller)">
+                    <i class="fas fa-fw @menu.Icono"></i>
+                    <span>@menu.DisplayText</span>
+                </a>
+            }
+
+        </li>
+    }
+
+
+
+
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+</ul>

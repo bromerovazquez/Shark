@@ -1,0 +1,49 @@
+﻿@model Drim.Interfaces.MVC.Entities.CronExpressionModel
+
+
+<h2>Configuracion de Horario de Ejecucion</h2>
+
+
+
+
+<div class="form-group">
+    @Html.LabelFor(model => model.TipoFrecuencia, "TipoFrecuencia", new { @class = "control-label" })
+    @Html.DropDownListFor(model => model.TipoFrecuencia,Model.TiposFrecuencias, new { @class = "form-control" })
+</div>
+
+<div class="frecuenciaDia">
+
+
+
+</div>
+<div class="frecuenciaSemana"></div>
+<div class="frecuenciaMes"></div>
+
+
+
+
+<div class="form-group">
+    @Html.LabelFor(model => model.Minutos, "Minutos", new { @class = "control-label" })
+    @Html.TextBoxFor(model => model.Minutos, new { @class = "form-control" })
+
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.Horas, "Horas", new { @class = "control-label" })
+    @Html.TextBoxFor(model => model.Horas, new { @class = "form-control" })
+
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.DiasDelMes, "DiasDelMes", new { @class = "control-label" })
+    @Html.TextBoxFor(model => model.DiasDelMes, new { @class = "form-control" })
+
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.Meses, "Meses", new { @class = "control-label" })
+    @Html.TextBoxFor(model => model.Meses, new { @class = "form-control" })
+
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.DiasDeLaSemana, "DiasDeLaSemana", new { @class = "control-label" })
+    @Html.TextBoxFor(model => model.DiasDeLaSemana, new { @class = "form-control" })
+
+</div>

@@ -1,0 +1,91 @@
+﻿@using Drim.Interfaces.MVC.Entities
+@model List<Interfaces_Procesos>
+
+
+<script>
+
+    $(document).ready(function(){
+    
+    
+    $(".verdetallearchivo").on("click",function(e)
+    {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        var id = $(this).data('id');
+
+         GetDetalleArchivo(id);
+
+    });
+
+
+    
+    $("#btnCrearNuevoArchivo").on("click",function(e)
+    {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        GetDetalleArchivo(0);
+
+    });
+    
+    
+    });
+
+
+    var GetDetalleArchivo = function(id)
+    {
+    
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetContentArchivo","ManagerInterfaces")' + "?id=" + id,
+            success: function (data)
+            {
+                $("#divContentDetalleArchivo").html(data);
+                $("#divContentListArchivos").slideToggle('hide');
+                $("#divContentDetalleArchivo").slideToggle('show');
+
+            },
+            beforeSend: function (e) 
+            {
+                $("#divContentDetalleArchivo").html("");
+               
+                
+            }
+            });
+
+
+    
+    };
+
+
+</script>
+
+
+
+<h2>Procesos</h2>
+<button id="btnCrearNuevoArchivo" style="width:200px;" class="btn btn-primary">Nuevo</button>
+
+<table class="table-container">
+    <thead>
+        <tr>
+            <th>Nombre de Proceso</th>
+            <th>Descripcion</th>
+            <th>Orden</th>
+            <th>Detalle</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var archivo in Model.OrderBy(o=> o.Orden))
+        {
+            <tr>
+                <td>@archivo.NombreProceso</td>
+                <td>@archivo.DescripcionProceso</td>
+                <td>@archivo.Orden</td>
+                <td>
+                    <a class="verdetallearchivo" data-id="@archivo.ArchivoId" href="#">Ver Detalle</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

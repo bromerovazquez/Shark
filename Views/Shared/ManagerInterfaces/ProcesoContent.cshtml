@@ -1,0 +1,104 @@
+﻿@using Drim.Interfaces.MVC.Entities
+@using Drim.Interfaces.MVC.Helpers
+@model Interfaces_Procesos
+
+@{
+    long focusStepId = ViewData["focusStepId"] != null ? (long)ViewData["focusStepId"] : 0;
+
+    short ultimoOrdenStep = ViewData["ultimoOrdenStep"] != null ? (short)ViewData["ultimoOrdenStep"] : Convert.ToInt16(0);
+}
+
+
+
+<script>
+$(document).ready(function(){
+
+    $("#aCancelar").on("click",function(e){
+    
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+
+       $.ajax({
+        type: 'GET',
+        url: '@Url.Action("GetArchivos","ManagerInterfaces")',
+        success: function (data)
+        {
+              
+            $("#divContentListArchivos").html(data);
+            $("#divContentListArchivos").slideToggle('show');
+            $("#divContentDetalleArchivo").slideToggle('hide');
+            $("#divContentDetalleArchivo").html("");
+            
+        },
+        beforeSend: function (e) {
+            $("#divContentListArchivos").html("");
+        }
+
+        });
+
+
+      
+
+
+    });
+
+
+
+});
+</script>
+
+
+
+<div class="col-12" style="text-align:end">
+    <a id="aCancelar" style="position: absolute; z-index: 100;top: -10px;right: -10px; font-size:14px;" class="btn btn-danger btn-circle aCancelar" href="#"><i class="fa-solid fa-list"></i></a>
+</div>
+
+<ul id="navArchivos" class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link alink@(focusStepId==-1?" active":"")" id="pestanaArchivo" data-idpanel="tabArchivo">@("Proceso | "+ Model.NombreProceso)</a>
+    </li>
+
+    @foreach (var step in Model.Steps.OrderBy(o => o.Orden))
+    {
+        <li class="nav-item">
+            <a class="nav-link alink@(focusStepId==step.StepId?" active":"")"  data-id="@step.StepId" id="pestanaSteps_@step.StepId" data-idpanel="tabSteps_@step.StepId">@("Step "+ (step.Orden.HasValue?step.Orden.Value:0) + " | "+ step.Descripcion)</a>
+        </li>
+    }
+
+    <li id="tabNuevoStep" style="@(Model.ArchivoId == 0?"display:none":"")" class="nav-item">
+        <a class="nav-link alink@(focusStepId==0?" active":"")"  data-id="0" id="pestanaSteps_0" data-idpanel="tabSteps_0">Step +</a>
+    </li>
+</ul>
+<div class="accordion" id="accordionArchivo">
+    <div class="card">
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionArchivo">
+            <div class="card-body">
+                <div id="contentTabArchivo" class="tab-content clearfix">
+
+                    <div class="tab-pane@(focusStepId==-1?" active":"")" id="tabArchivo">
+                        @await Html.PartialAsync("~/Views/Shared/ManagerInterfaces/ProcesoForm.cshtml",new ViewDataDictionary(this.ViewData))
+                    </div>
+
+                    @foreach (var step in Model.Steps.OrderBy(o => o.Orden))
+                    {
+                        <div class="tab-pane contentstep@(focusStepId==step.StepId?" active":"")" id="tabSteps_@step.StepId">
+
+                            @await Html.PartialAsync("~/Views/Shared/ManagerInterfaces/StepForm.cshtml", step,new ViewDataDictionary(this.ViewData))
+
+                        </div>
+                    }
+
+                    <div class="tab-pane contentstep@(focusStepId==0?" active":"")" id="tabSteps_0">
+                         @await Html.PartialAsync("~/Views/Shared/ManagerInterfaces/StepForm.cshtml", new Interfaces_Procesos_Steps(){ ArchivoId = Model.ArchivoId , IdTipoAccion = 0 , Orden = ultimoOrdenStep, Path_Destino_Adaia = EntornoHelper.Path_Destino_Adaia.url, Path_Destino_Manager = EntornoHelper.Path_Destino_Manager.url , Path_Origen_Adaia = EntornoHelper.Path_Origen_Adaia.url, Path_Origen_Manager =EntornoHelper.Path_Origen_Manager.url  },new ViewDataDictionary(this.ViewData))
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

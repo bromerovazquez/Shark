@@ -1,0 +1,98 @@
+﻿@model List<Drim.Interfaces.MVC.ViewModels.TraspasoProveedorOrigenDestino>
+
+    @{
+    var codProveedor = ViewData["codProveedor"] != null ? (int)ViewData["codProveedor"] : 0;
+    var codAlmacenOrigen = ViewData["codAlmacenOrigen"] != null ? ViewData["codAlmacenOrigen"] : string.Empty;
+    var codAlmacenDestino = ViewData["codAlmacenDestino"] != null ? ViewData["codAlmacenDestino"] : string.Empty;
+    var codArticulo = ViewData["codArticulo"] != null ? (int)ViewData["codArticulo"] : 0;
+    var fechaInicio = ViewData["fechaInicio"] != null ? (DateTime?)ViewData["fechaInicio"] : null;
+    var fechaFin = ViewData["fechaFin"] != null ? (DateTime?)ViewData["fechaFin"] : null;
+
+    var IsSeparadoPorTienda = ViewData["IsSeparadoPorTienda"] != null ? (bool)ViewData["IsSeparadoPorTienda"] : true;
+
+    }
+
+
+
+    @if(Model.Any())
+    {
+
+<div class="row form-group mt-2">
+    <label class="col-3 col-form-label drim-label">Accion:</label>
+    <div class="col-4">
+        <label>Genera Albaranes Devolucion Proveedores @codAlmacenDestino</label>
+    </div>
+</div>
+
+<div class="row form-group mt-2">
+    <label  class="col-3 col-form-label drim-label">Total Proveedores:</label>
+    <div  class="col-4">
+          @Model.GroupBy(g=> g.codProveedor).Count()
+    </div>
+</div>
+<div class="row form-group mt-2">
+    <label class="col-3 col-form-label drim-label">Periodo:</label>
+    <div class="col-4">
+        @((fechaInicio.HasValue?fechaInicio.Value.ToString("dd/MM/yyyy HH:mm:ss"):"") + " - " + (fechaFin.HasValue?fechaFin.Value.ToString("dd/MM/yyyy HH:mm:ss"):""))
+    </div>
+</div>
+<div class="row form-group mt-2">
+    <label class="col-3 col-form-label drim-label">Almacenes:</label>
+    <div  class="col-4">
+            @Model.GroupBy(g=> g.codAlmacenOrigen).Count()
+    </div>
+</div>
+
+
+<div class="row form-group mt-2">
+    <label class="col-3 col-form-label drim-label">Total Articulos:</label>
+    <div class="col-4">
+        @Model.SelectMany(s=> s.traspasos).GroupBy(x=> x.CodArticulo).Count()
+    </div>
+</div>
+
+
+<div class="row form-group mt-2">
+    <div class="col-6">
+    <p>
+        @if(IsSeparadoPorTienda)
+        {
+        
+        <p>Se generara por Proveedor y Almacen</p>
+        }else
+        {
+        <p>Se generara por Proveedor</p>
+        }
+
+    </p>
+    </div>
+</div>
+
+
+
+
+
+<div class="row form-group mt-2">
+    <div class="col-12">
+        <input type="button" style="width:400px;" value="Generar Albaranes" class="btn btn-primary"
+        data-codproveedor="@codProveedor"       
+        data-origen="@codAlmacenOrigen"
+        data-destino="@codAlmacenDestino"
+               data-fechainicio="@(fechaInicio.HasValue?fechaInicio.Value.ToString("ddMMyyyyHHmmss"):"")"
+               data-fechafin="@(fechaFin.HasValue?fechaFin.Value.ToString("ddMMyyyyHHmmss"):"")"
+               data-codarticulo="@codArticulo"
+               data-isseparadoportienda="@(IsSeparadoPorTienda?"true":"false")"
+               id="btnGeneraAlbaranTraspasoY" />
+    </div>
+</div>
+
+
+}else
+{
+
+
+<p>Ya se ha creado el albaran de estos traspasos</p>
+
+
+
+}

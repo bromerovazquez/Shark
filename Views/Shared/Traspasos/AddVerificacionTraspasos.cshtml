@@ -1,0 +1,68 @@
+﻿ @{
+    var codAlmacenOrigen = ViewData["codAlmacenOrigen"] != null ? (string)ViewData["codAlmacenOrigen"] : string.Empty;
+    var codAlmacenDestino = ViewData["codAlmacenDestino"] != null ? (string)ViewData["codAlmacenDestino"] : string.Empty;
+    var AlmacenOrigen = ViewData["AlmacenOrigen"] != null ? (string)ViewData["AlmacenOrigen"] : string.Empty;
+    var AlmacenDestino = ViewData["AlmacenDestino"] != null ? (string)ViewData["AlmacenDestino"] : string.Empty;
+    var codArticulo = ViewData["codArticulo"] != null ? (string)ViewData["codArticulo"] : string.Empty;
+    var NombreArticulo = ViewData["NombreArticulo"] != null ? (string)ViewData["NombreArticulo"] : string.Empty;
+    var refArticulo = ViewData["refArticulo"] != null ? (string)ViewData["refArticulo"] : string.Empty;
+    var cantidad = ViewData["cantidad"] != null ? (string)ViewData["cantidad"] : string.Empty;
+    var Fecha = ViewData["Fecha"] != null ? (string)ViewData["Fecha"] : string.Empty;
+    
+    var tipo = ViewData["tipo"] != null ? (string)ViewData["tipo"] : string.Empty;
+    var zona = ViewData["zona"] != null ? (string)ViewData["zona"] : string.Empty;
+    
+
+}
+
+
+
+
+
+    <div class="row form-group mt-3">
+
+        <label class="col-3 col-form-label drim-label">Origen:</label>
+        <div class="col-3">
+            @AlmacenOrigen
+        </div>
+        <label class="col-3 col-form-label drim-label">Destino:</label>
+        <div class="col-3">
+           @AlmacenDestino
+        </div>
+        
+        
+    </div>
+
+    <div class="row form-group mt-3">
+    
+        <label class="col-3 col-form-label drim-label">Articulo:</label>
+        <div class="col-3">
+            @(NombreArticulo + "-" + refArticulo)
+        </div>
+
+        <label class="col-3 col-form-label drim-label">Cantidad:</label>
+        <div class="col-3">
+            @cantidad
+        </div>
+    </div>
+
+    <div class="row form-group mt-3">
+      <label class="col-3 col-form-label drim-label">Fecha:</label>
+        <div class="col-3">
+            @Fecha
+        </div>
+    </div>
+    <div class="row form-group mt-3">
+        <label class="col-3 col-form-label drim-label">Zona:</label>
+        <div class="col-3">
+            @zona
+        </div>
+    </div>
+
+
+    <div class="row form-group mt-3">
+        <div class="col-12">
+            <input class="btn btn-primary" type="button"  data-codalmacenorigen="@codAlmacenOrigen" data-codalmacendestino="@codAlmacenDestino" data-codarticulo="@codArticulo" data-cantidad="@cantidad" data-fecha="@Fecha" data-tipo="@tipo" data-zona="@zona" value="Agregar Traspaso" id="tbnAgregarTraspasosOK" />
+        </div>
+    </div>
+    

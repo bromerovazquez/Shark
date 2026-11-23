@@ -1,0 +1,60 @@
+﻿@using Drim.Interfaces.MVC.Entities
+@model List<LogGestionTraspasosAlbaranes>
+
+    <h1>El traspaso tiene movimientos registrados</h1>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>
+                Tipo
+            </th>
+            <th>
+                codProveedor
+            </th>
+            <th>
+                codAlmacen Origen
+            </th>
+            <th>
+                codAlamcen Destino
+            </th>
+            <th>
+                codAlamcen Destino Nuevo
+            </th>
+            <th>
+                CodArticulo
+            </th>
+            <th>
+                Fecha Creacion
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach(var log in Model)
+            {
+            <tr>
+                <td>
+                    @log.Tipo
+                </td>
+                <td>
+                    @log.codProveedor
+                </td>
+                <td>
+                    @log.codAlmacenOrigen
+                </td>
+                <td>
+                    @log.codAlmacenDestino
+                </td>
+                <td>
+                    @log.codAlmacenDestinoNuevo
+                </td>
+                 <td>
+                    @log.codArticulo
+                </td>
+                 <td>
+                    @(log.DateCreate.HasValue? log.DateCreate.Value.ToString("dd/MM/yyyy"):"")
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>

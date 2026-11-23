@@ -1,0 +1,343 @@
+﻿@using Drim.Interfaces.MVC.Entities;
+@model Interfaces_Procesos
+
+@{
+
+    var parametroActual = ViewData["parametro"] != null ? (Interfaces_Procesos_Steps_Parametros)ViewData["parametro"] : new Interfaces_Procesos_Steps_Parametros();
+
+}
+
+
+<script>
+
+        $(document).ready(function()
+        {
+
+            $("#ddlSeleccionaStep").on("change",function(e){
+
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                var id = $(this).val();
+
+                console.log('ddlSeleccionaStep.change');
+
+                $.ajax({
+                type: 'GET',
+                url: '@Url.Action("GetStepParametros","ManagerInterfaces")' + "?idStep=" + id + "&tipoParametro=out",
+                success: function (jsonString)
+                {
+                   data =  JSON.parse(jsonString);
+                   console.log(data);
+
+                    $("#ddlSeleccionaParametro").append("<option value='-1'>--Seleccionar--</option>");
+
+                    data.forEach(function(item,index)
+                    {
+                        var option = "<option data-descripcion='"+item.NombreParametro+"' value='"+item.ParametroId+"'>"+item.NombreParametro+"</option>"
+
+                        $("#ddlSeleccionaParametro").append(option);
+                    });
+
+                },
+                beforeSend: function (e) {
+                    $("#ddlSeleccionaParametro").html("");
+                }
+
+            });
+
+            });
+
+
+
+            $("#btnSetValueParametro").on("click",function(e){
+             e.preventDefault();
+             e.stopImmediatePropagation();
+
+             var valueparametro = $("#setValueParametro").data('value');
+
+             var idparametro = $(this).parent('div').parent('div').find('#tableSetValueParametro').first().data('idparametro');
+
+
+               $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("UpdateValueParametro","ManagerInterfaces")' ,
+                    data:{  "idparametro": idparametro,"valueparametro":valueparametro},
+                    success: function (data)
+                    {
+                        if(data.result !== undefined && data.result !== null && data.result == "NOK")
+                        {
+                            alert(data.mensaje);
+
+                        }else{
+
+                        $("#divContentDetalleArchivo").html(data);
+                        $("#divContentDetalleArchivo").show();
+
+                        $("#modalSetparametros").modal('hide');
+                        $("#divContentSetparametros").html("");
+
+                        }
+                    },
+                    beforeSend: function (e) {
+                        $("#divContentDetalleArchivo").html("");
+                    }
+                    });
+
+
+
+            });
+
+
+
+
+            $("#btnSeleccionarParametro").on("click",function(e)
+            {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                console.log('btnSeleccionarParametro.click');
+
+                var idparametro = $(this).data('idparametro');
+
+                var valueStepNuevo = $("#ddlSeleccionaStep").val();
+                var descripcionStepNuevo = $("#ddlSeleccionaStep").find("option:selected").data('orden');
+
+                var valueParametroNuevo = $("#ddlSeleccionaParametro").val();
+                var descripcionParametroNuevo = $("#ddlSeleccionaParametro").find("option:selected").data('descripcion');
+
+                var descripcionParametroActual =  $("#setValueParametro").val();
+                var valueParametroActual =  $("#setValueParametro").data('value');
+
+                var agregaDescripcionNueva = "[" + descripcionStepNuevo + "]." + descripcionParametroNuevo;
+                var agregaValueNueva = "[" + valueParametroNuevo + "]";
+
+
+                console.log(descripcionParametroActual);
+                console.log(valueParametroActual);
+                
+
+                descripcionParametroActual = descripcionParametroActual +  agregaDescripcionNueva;
+                valueParametroActual =  valueParametroActual + agregaValueNueva;
+
+               
+                console.log(descripcionParametroActual);
+                console.log(valueParametroActual);
+
+
+                $("#setValueParametro").val(descripcionParametroActual);
+                $("#setValueParametro").data('value',valueParametroActual);
+
+
+            });
+
+
+            $('.setOperador').on("click",function(e){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+
+                var operador = $(this).data('operador');
+                var descripcionParametroActual =  $("#setValueParametro").val();
+                var valueParametroActual =  $("#setValueParametro").data('value');
+                descripcionParametroActual += operador;
+                valueParametroActual += operador;
+                $("#setValueParametro").val(descripcionParametroActual);
+                $("#setValueParametro").data('value',valueParametroActual);
+            });
+
+
+            $('#btnAgregarConstante').on("click",function(e){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                var constante = $("#setConstanteParametro").val();
+                var descripcionParametroActual =  $("#setValueParametro").val();
+                var valueParametroActual =  $("#setValueParametro").data('value');
+                descripcionParametroActual += "<" + constante + ">";
+                valueParametroActual += "<" + constante + ">";
+                $("#setValueParametro").val(descripcionParametroActual);
+                $("#setValueParametro").data('value',valueParametroActual);
+            });
+
+
+            $("#btnBorrarParametro").on("click",function(e){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                var descripcionParametroActual =  $("#setValueParametro").val();
+                var valueParametroActual =  $("#setValueParametro").data('value');
+
+                descripcionParametroActual = BorraUltimoParametros(descripcionParametroActual);
+                valueParametroActual = BorraUltimoParametros(valueParametroActual);
+
+                $("#setValueParametro").val(descripcionParametroActual);
+                $("#setValueParametro").data('value',valueParametroActual);
+
+            });
+
+
+
+
+        });
+
+
+        var BorraUltimoParametros = function (parametro)
+        {
+            console.log(parametro);
+
+            var parametroLimpio = "";
+            var operaciones = ["+", "-", "*", "/"];
+            var utlimoCaracter =   obtenerUltimoCaracter(parametro);
+
+            console.log(utlimoCaracter);
+
+            if(operaciones.includes(utlimoCaracter))
+            {
+                console.log('UltimoCaracter operador');
+
+                parametroLimpio = parametro.substring(0,parametro.length-1);
+
+                console.log(parametroLimpio);
+
+                return parametroLimpio;
+            }
+
+           var regexPattern = "[+/*/-]";
+
+            var parametros =  parametro.toString().split(new RegExp(regexPattern));
+
+            console.log(parametros);
+
+
+            if(parametros.length==0)
+            {
+                return "";
+
+            }else
+            {
+
+                console.log('Reemplaza');
+                console.log(parametros[parametros.length-1]);
+                parametroLimpio = parametro.toString().replace(parametros[parametros.length-1],"");
+
+            }
+
+            return parametroLimpio;
+        };
+
+
+     function obtenerUltimoCaracter(cadena) {
+         
+      if (cadena.length === 0) {
+        return null; // La cadena está vacía
+      }
+
+      return cadena.toString().charAt(cadena.length - 1);
+    }
+
+
+
+</script>
+
+<style>
+
+    #tableSetValueParametro {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #tableSetValueParametro td, th {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+</style>
+
+
+<h2>@(parametroActual.NombreParametro + "(" + parametroActual.TypeDataParametro + ")" )</h2>
+
+
+<table id="tableSetValueParametro" data-idparametro="@parametroActual.ParametroId" width="100%">
+    <colgroup>
+        <col style="width: 50%" />
+        <col style="width: 50%" />
+    </colgroup>
+    <tr>
+        <td style="vertical-align: top;">
+            <table width="100%">
+                <tr>
+                    <td>
+                        <textarea cols="20" rows="2" class="form-control" type="text" id="setValueParametro" data-value="@parametroActual.ValueParametro" value="@parametroActual.ValueParametroDescripcion" style="font-size:11px;width:300px;" >@parametroActual.ValueParametroDescripcion</textarea>
+                    </td>
+                    <td>
+                        <button id="btnBorrarParametro" class="btn btn-danger">< </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;" colspan="2">
+                        <table width="100%">
+                            <tr>
+                                <td>
+                                    <button style="width:100%" data-operador="+" class="setOperador">+</button>
+                                </td>
+                                <td>
+                                    <button style="width:100%" data-operador="-" class="setOperador">-</button>
+                                </td>
+                                <td>
+                                    <button style="width:100%" data-operador="*" class="setOperador">*</button>
+                                </td>
+                                <td>
+                                    <button style="width:100%" data-operador="/" class="setOperador">/</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;" colspan="2">
+                        <label for="setConstanteParametro">Constante:</label>
+                        <input class="form-control" type="text" id="setConstanteParametro" style="width:200px;" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top;" colspan="2">
+                        <button id="btnAgregarConstante" class="btn btn-primary">Agregar Constante</button>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td style="vertical-align: top;">
+            <table width="100%">
+                <tr>
+                    <td>
+                        Busca el Valor de un Parametro de Salida
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="floatingInput">Step</label>
+                        <select data-idarchivo="@(Model!=null? Model.ArchivoId:0)" class="form-control" id="ddlSeleccionaStep">
+                            <option value="-1">--Seleccionar--</option>
+                            @foreach (var step in Model.Steps.Where(x => x.StepId != parametroActual.StepId))
+                            {
+                                <option data-orden="@step.Orden" data-descripcion="@step.Descripcion.Replace(" ", "")" value="@step.StepId">@(step.IdTipoAccion.Value.ToString() + "|" +step.Descripcion)</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="floatingInput2">Parametro</label>
+                        <select class="form-control" id="ddlSeleccionaParametro">
+                            <option value="-1">--Seleccionar--</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><button id="btnSeleccionarParametro" data-idparametro="@parametroActual.ParametroId" class="btn btn-primary">Agregar Parametro</button></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

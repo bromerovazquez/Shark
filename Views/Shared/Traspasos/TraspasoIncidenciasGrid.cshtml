@@ -1,0 +1,53 @@
+﻿@model List<Drim.Interfaces.MVC.Entities.TraspasoIncidencias>
+
+
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Almacen Origen</th>
+                <th>Almacen Destino</th>
+                <th>codArticulo</th>
+                <th>Cantidad</th>
+                <th>Fecha Traspaso</th>
+                <th>Fecha Lectura</th>
+                <th>Version Producto</th>
+                <th>TipoIncidencia</th>
+                <th></th>
+                
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach(var traspaso in Model.OrderBy(x=> x.FechaCreacion))
+            {
+            <tr>
+                <td>
+                    @traspaso.AlmacenOrigen
+                </td>
+                <td>
+                    @traspaso.AlmacenDestino
+                </td>
+                <td>
+                    @traspaso.CodArticulo
+                </td>
+                <td>
+                    @traspaso.Cantidad
+                </td>
+                <td>
+                    @traspaso.FechaCreacion.ToString("dd/MM/yyyy")
+                </td>
+               <td>
+                    @(traspaso.FechaLectura.HasValue? traspaso.FechaLectura.Value.ToString("dd/MM/yyyy"): "")
+                </td>
+                 <td>
+                    @traspaso.VersioProducte
+                </td>
+                <td>
+                    @traspaso.TipoInidencia
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+

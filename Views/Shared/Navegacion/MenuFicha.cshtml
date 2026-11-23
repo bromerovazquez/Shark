@@ -1,0 +1,161 @@
+﻿@model List<Drim.Interfaces.MVC.Entities.MenuRol>
+
+
+
+<style>
+    .NotSavedModule {
+        background-color: red !important;
+        color: white !important;
+    }
+
+
+    .OKSavedModule {
+        background-color: blue !important;
+        color: white !important;
+        margin-left: 1px;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function () {
+
+
+        $("#ulPestayasPrincipal").find(".nav-link").click(function () {
+
+            console.log("PestañasClick");
+
+            $("#ulPestayasPrincipal").find(".nav-link").removeClass("active");
+
+            $(this).addClass("active");
+
+            $(".tabprincipal").removeClass("active");
+
+            $("#"+ $(this).data("idpanel")).addClass("active");
+
+            if ($(this).data("idpanel") == "tabprincipal1") {
+                $(".containerGeneralResumenStatic").hide();
+            } else {
+                $(".containerGeneralResumenStatic").show();
+            }
+
+        });
+
+        $(".containersEmpleado").delegate(".btnVolver", "click", function () {
+            console.log("btnVolver");
+            //$('#modalDetalleEmpleado').modal('hide');
+        });
+
+
+
+
+        $("#pestañaprincipal10").on("click", function () {
+
+            var codempleado = $("#hcodeEmpleado").val();
+
+            $.ajax({
+                type: 'GET',
+                url: "Empleado/GestionDocumentos?codigo=" + codempleado,
+                accept: "application/json",
+                success: function (data) {
+
+                    console.log(data);
+                    $("#divModalLoading").modal('hide');
+                    $("#contentEmpleadoDocumentos").html(data);
+                    
+                },
+                beforeSend: function (e) {
+
+                    $("#divModalLoading").modal('show');
+                    $("#contentEmpleadoDocumentos").html("");
+                }
+            });
+
+        });
+
+
+
+         $("#pestañaprincipal20").on("click", function () {
+
+             var codVendedor = $("#hcodVendedor").val();
+             var codAlmacen = $("#hcodAlmacen").val();
+             var codempleado = $("#hcodeEmpleado").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "Vacaciones/SolicitudVacaciones",
+                data: { "codAlmacen": codAlmacen, "codVendedor": codVendedor, "codigo_empleado": codempleado}, 
+                accept: "application/json",
+                success: function (data) {
+                    console.log(data);
+                    $("#contentEmpleadoSolicitudVacaciones").html(data);
+                    $("#divModalLoading").modal('hide');
+                },
+                beforeSend: function (e) {
+                    $("#divModalLoading").modal('show');
+                    $("#contentEmpleadoSolicitudVacaciones").html("");
+                }
+            });
+
+
+
+        });
+
+
+
+        //$(".itemmenupestañas").on("click", function () {
+
+        //    console.log("itemmenupestañas");
+
+        //    if ($(this).data("idpanel") == "tabprincipal3") //Panle General
+        //    {
+        //        $("#tabprincipal3").addClass("active");
+        //    }
+        //    else {
+
+        //        var codVendedor = $("#hcodVendedor").val();
+        //        var codAlmacen = $("#hcodAlmacen").val();
+        //        var urlaction = $(this).data('urlaction');
+
+
+        //        $.ajax({
+        //            type: 'POST',
+        //            url: urlaction,
+        //            data: { "codAlmacen": codAlmacen, "codVendedor": codVendedor },
+        //            accept: "application/json",
+        //            success: function (data) {
+        //                $("#divModalLoading").modal('hide');
+        //                $("#containersModulo").html(data);
+        //                $("#tabModulo").addClass("active");
+
+        //            },
+        //            beforeSend: function (e) {
+        //                $("#divModalLoading").modal('show');
+        //                $("#containersModulo").html("");
+        //            }
+        //        });
+        //    }
+        //});
+
+
+
+    });
+
+
+
+</script>
+
+
+
+
+<ul id="ulPestayasPrincipal" class="nav nav-tabs">
+    @foreach (var item in Model.Where(x => x.IsMenuPestayas.HasValue && x.IsMenuPestayas.Value).OrderBy(x => x.OrderDisplay))
+    {
+        <li class="nav-item">
+            <a id="@("pestañaprincipal"+item.IdPagina)" data-modulo="@item.Pagina" data-url="@Url.Action(item.Action, item.Controller)"  class="@("nav-link alinkprincipal itemmenupestañas " + (@item.IdPagina == 3? "active":"")) OKSavedModule" data-idpanel="@("tabprincipal"+item.IdPagina)">@item.DisplayText</a>
+        </li>
+    }
+</ul>
+
+
+

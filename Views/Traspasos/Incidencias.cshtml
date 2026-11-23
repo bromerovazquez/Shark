@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Drim.Interfaces.MVC.Entities.TraspasoIncidencias>
+
+@{
+    ViewData["Title"] = "Traspasos Incidencias";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var AlmacenesList = ViewData["almacenes"] != null ? (List<SelectListItem>)ViewData["almacenes"] : new List<SelectListItem>();
+}
+
+
+
+<script>
+
+
+  $(document).ready(function()
+    {
+
+
+         $("#divContainerFilterTraspaso").delegate("#tbnBuscarTraspasos","click",function(e){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            console.log("tbnBuscarTraspasos");
+            BuscarTraspasos();
+        });
+
+
+    });
+
+
+
+var BuscarTraspasos = function()
+    {
+
+     var codAlmacenOrigen = $("#ddlFilterAlmacenOrigen").val();
+     var codAlmacenDestino = $("#ddlFilterAlmacenDestino").val();
+
+     var fechaInicio = $("#txbFilterFechaInicio").val();
+     var fechaFin = $("#txbFilterFechaFin").val();
+     var tipo = $("#ddlFilterTipoIncidencia").val();
+     var codArticulo = $("#ddlFilterArticulo").val();
+     var containerResult = $("#hidContainerGridResult").val();
+
+        $.ajax({
+
+            type: 'GET',
+            url: '@Url.Action("GetTraspasosIncidencias","Traspasos")' + "?codAlmacenOrigen=" + codAlmacenOrigen + "&codAlmacenDestino=" + codAlmacenDestino + "&fechaInicio=" + fechaInicio + "&fechaFin=" + fechaFin + "&tipo=" + tipo  + "&codArticulo=" + codArticulo,
+            success: function (data)
+            {
+                if(data.result!= null && data.result =="NOK")
+                {
+
+                }
+
+                $("#divModalLoading").modal("hide");
+                $("#" + containerResult).html(data);
+            },
+            beforeSend: function (e) {
+                $("#divModalLoading").modal("show");
+                $("#" + containerResult).html("");
+            }
+        });
+    };
+
+
+
+
+
+</script>
+
+
+
+<div id="divContainerFilterTraspaso">
+@await Html.PartialAsync("~/Views/Shared/Traspasos/FiltersTraspasos.cshtml",AlmacenesList, new ViewDataDictionary(this.ViewData){ { "divContainerGridTraspasos","divContainerGridTraspasos" },{ "IsIncidencias",true } })
+</div>
+<br />
+<div id="divContainerGridTraspasos">
+
+    @if (Model.Any())
+    {
+        @await Html.PartialAsync("~/Views/Shared/Traspasos/TraspasoIncidenciasGrid.cshtml",Model)
+    }
+
+</div>

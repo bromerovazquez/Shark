@@ -1,0 +1,809 @@
+﻿@using Drim.Interfaces.MVC.Entities
+@using Drim.Interfaces.MVC.Helpers
+@model Interfaces_Procesos_Steps
+
+@{
+
+    Dictionary<int, string> tiposAcciones = new Dictionary<int, string>();
+    tiposAcciones.Add(1, "Archivo");
+    tiposAcciones.Add(2, "QuerySql");
+    tiposAcciones.Add(3, "DataExchange");
+    SelectList idTiposAccion = new SelectList(tiposAcciones, "Key", "Value");
+
+
+    Dictionary<string, string> tipoDireccion = new Dictionary<string, string>();
+    tipoDireccion.Add("i", "Ida");
+    tipoDireccion.Add("v", "Vuelta");
+    SelectList idTipoDireccion = new SelectList(tipoDireccion, "Key", "Value");
+
+
+    Dictionary<string, string> tipoQuery = new Dictionary<string, string>();
+    tipoQuery.Add("s", "StoreProcedure");
+    tipoQuery.Add("t", "Text");
+    SelectList idTipoQuery = new SelectList(tipoQuery, "Key", "Value");
+
+    Dictionary<string, string> _IdsMapDataExchanged = new Dictionary<string, string>();
+    _IdsMapDataExchanged.Add("Seleccionar", "Ida");
+
+    Dictionary<string, string> _BasesDatos = new Dictionary<string, string>();
+    _BasesDatos.Add("G001", "G001");
+    _BasesDatos.Add("DRIM", "DRIM");
+    _BasesDatos.Add("PDV", "PDV");
+    _BasesDatos.Add("WEB_DATOS", "WEB_DATOS");
+    _BasesDatos.Add("WEB_PEDIDOS", "WEB_PEDIDOS");
+    SelectList BasesDatos = new SelectList(_BasesDatos, "Key", "Value");
+
+
+
+    SelectList IdsMapDataExchanged = ViewData["IdsMapDataExchanged"] != null ? (SelectList)ViewData["IdsMapDataExchanged"] : new SelectList(_IdsMapDataExchanged, "Key", "Value");
+
+    bool IsFirstStepAutomatic = ViewData["IsFirstStepAutomatic"] != null ? (bool)ViewData["IsFirstStepAutomatic"] : false;
+
+
+    if (Model.IdTipoAccion == 1)
+    {
+        Model.Path_Destino_Adaia = string.IsNullOrEmpty(Model.Path_Destino_Adaia) ? EntornoHelper.Path_Destino_Adaia.url : Model.Path_Destino_Adaia;
+        Model.Path_Destino_Manager = string.IsNullOrEmpty(Model.Path_Destino_Manager) ? EntornoHelper.Path_Destino_Manager.url : Model.Path_Destino_Manager;
+        Model.Path_Origen_Adaia = string.IsNullOrEmpty(Model.Path_Origen_Adaia) ? EntornoHelper.Path_Origen_Adaia.url : Model.Path_Origen_Adaia;
+        Model.Path_Origen_Manager = string.IsNullOrEmpty(Model.Path_Origen_Manager) ? EntornoHelper.Path_Origen_Manager.url : Model.Path_Origen_Manager;
+    }
+
+
+
+}
+
+<script>
+        $(document).ready(function(){
+
+
+
+
+
+        $(".archivosFileStep").on("change",function(e)
+        {
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            var updateContent = $(this).parent('div').parent('div').parent('div');
+
+            var idArchivo = $("#ArchivoId").val();
+            var StepId = updateContent.find("#StepId").first().val(); 
+
+            var IdTipoAccion = updateContent.find("#IdTipoAccion").first().val();
+            var Descripcion = updateContent.find("#Descripcion").first().val();
+            var Direccion = updateContent.find("#Direccion").first().val();
+
+            var IsParametroNameFile = updateContent.find("#IsParametroNameFile").first().is(':checked');
+
+            var SeparadorParametrosNameFile = updateContent.find("#SeparadorParametrosNameFile").first().val();
+
+            var IsCABParametros = contentUpdate.find("#IsCABParametros").first().is(':checked');
+
+            
+
+
+            if(Descripcion.length==0)
+            {
+                alert("Debe de introducir la Descripcion del Step");
+                $(this).val(null);
+                return;
+            }
+
+            if(IdTipoAccion.length==0)
+            {
+                alert("Debe de seleccionar el Tipo de Accion");
+                $(this).val(null);
+                return;
+            }
+
+            if(Direccion.length==0)
+            {
+                alert("Debe de introducir la Direccion del Step");
+                $(this).val(null);
+                return;
+            }
+
+
+            var contentUpdate = $(this).parent('div').parent('div').parent('div').find("#archivoParametros").first();
+
+            console.log(contentUpdate);
+
+
+            var fileUpload = $(this).get(0);
+            var files = fileUpload.files;
+            var data = new FormData();
+
+            data.append('idArchivo', idArchivo);
+            data.append('IdStep', StepId);
+            data.append('IdTipoAccion', IdTipoAccion);
+            data.append('Descripcion', Descripcion);
+            data.append('Direccion', Direccion);
+            data.append('IsParametroNameFile', IsParametroNameFile);
+            data.append('SeparadorParametrosNameFile', SeparadorParametrosNameFile);
+            data.append('IsCABParametros', IsCABParametros);
+         
+
+            for (var i = 0; i < files.length; i++) {
+            data.append(files[i].name, files[i]);
+            }
+
+            $.ajax({
+            type: "POST",
+            url: '@Url.Action("LoadDataFile","ManagerInterfaces")',
+            contentType: false,
+            processData: false,
+            data: data,
+            success: function (data)
+            {
+                //console.log(data);
+                //contentUpdate.html(data);
+                //contentUpdate.show();
+                if(data.result !== undefined && data.result!= null && data.result=="NOK")
+                {
+                    alert(data.mensaje);
+                }else
+                {
+                    $("#divContentDetalleArchivo").html(data);
+                    $("#divContentDetalleArchivo").show();
+                }
+            },
+            beforeSend: function (e) {
+                //contentUpdate.html("");
+                $("#divContentDetalleArchivo").html("");
+            },
+            error: function () {
+
+            }
+            });
+
+        });
+
+
+
+
+
+
+     $(".contentstep").delegate(".btnCargarParametrosQueryEntrada","click",function(e){
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+       var contentUpdate = $(this).parent('div').parent('div').parent('div').first();
+
+        var ArchivoId = $("#ArchivoId").val();
+        var StepId = contentUpdate.find("#StepId").first().val(); 
+        var Descripcion = contentUpdate.find("#Descripcion").first().val();
+        var Direccion = contentUpdate.find("#Direccion").first().val();
+        var IdTipoAccion = contentUpdate.find("#IdTipoAccion").first().val();
+
+        var TipoQuerySQL = contentUpdate.find("#TipoQuerySQL").first().val();
+        var QuerySQL =contentUpdate.find("#QuerySQL").first().val();
+        var DBSQL = contentUpdate.find("#DBSQL").first().val();
+
+        console.log(TipoQuerySQL);
+        console.log(QuerySQL);
+        console.log(DBSQL);
+
+        if(TipoQuerySQL.length==0)
+        {
+            alert("Debes de seleccionar el tipo de query");
+            return;
+        }
+        if(QuerySQL.length==0)
+        {
+            alert("Debes de introduccir la query o el nombre del storeprocedure");
+            return;
+        }
+        if(DBSQL.length==0)
+        {
+            alert("Debes de iseleccionar la Base de Datos");
+            return;
+        }
+
+
+        $.ajax({
+        type: 'GET',
+        url: '@Url.Action("GetParametrosQueryEntrada","ManagerInterfaces")' + "?ArchivoId="+ArchivoId+"&StepId="+StepId+"&Descripcion="+Descripcion+"&Direccion="+Direccion+"&IdTipoAccion="+IdTipoAccion+"&TipoQuerySQL=" + TipoQuerySQL + "&QuerySQL=" + QuerySQL + "&DBSQL=" + DBSQL,
+        success: function (data)
+        {
+            //contentUpdate.find("#querySQlParametrosInput").first().html(data);
+            //contentUpdate.find("#querySQlParametrosInput").first().show();
+
+            //contentUpdate.find("#divCargarParametrosQuerySalida").first().show();
+             if(data.result !== undefined && data.result!= null && data.result=="NOK")
+                {
+                    alert(data.mensaje);
+                }else
+                {
+                    $("#divContentDetalleArchivo").html(data);
+                    $("#divContentDetalleArchivo").show();
+                }
+
+        },
+        beforeSend: function (e) {
+            //contentUpdate.find("#querySQlParametrosInput").first().html("");
+             $("#divContentDetalleArchivo").html("");
+        }
+
+        });
+
+    });
+
+
+      $(".contentstep").delegate(".btnCargarParametrosQuerySalida","click",function(e){
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        
+        console.log('.btnCargarParametrosQuerySalida.click');
+
+        var contentUpdate = $(this).parent('div').parent('div').parent('div').first();
+        
+        console.log(contentUpdate);
+
+        var ArchivoId = $("#ArchivoId").val();
+
+       var StepId = contentUpdate.find("#StepId").first().val(); 
+        
+        //contentUpdate.find(".tablaparametros").each(function(index,element){
+        
+        //if($(this).data('tipoparametro') == "in")
+        //{
+        //   StepId = $(this).data('idstep');
+        //}
+        
+        
+        //});
+
+        //console.log(StepId);
+
+        var Descripcion = contentUpdate.find("#Descripcion").first().val();
+        var Direccion = contentUpdate.find("#Direccion").first().val();
+        var IdTipoAccion = contentUpdate.find("#IdTipoAccion").first().val();
+
+        var TipoQuerySQL = contentUpdate.find("#TipoQuerySQL").first().val();
+        var QuerySQL =contentUpdate.find("#QuerySQL").first().val();
+        var DBSQL = contentUpdate.find("#DBSQL").first().val();
+
+        console.log(TipoQuerySQL);
+        console.log(QuerySQL);
+        console.log(DBSQL);
+
+        if(TipoQuerySQL.length==0)
+        {
+            alert("Debes de seleccionar el tipo de query");
+            return;
+        }
+        if(QuerySQL.length==0)
+        {
+            alert("Debes de introduccir la query o el nombre del storeprocedure");
+            return;
+        }
+        if(DBSQL.length==0)
+        {
+            alert("Debes de iseleccionar la Base de Datos");
+            return;
+        }
+
+
+        $.ajax({
+        type: 'GET',
+        url: '@Url.Action("GetParametrosQuerySalida","ManagerInterfaces")' + "?ArchivoId="+ArchivoId+"&StepId="+StepId+"&Descripcion="+Descripcion+"&Direccion="+Direccion+"&IdTipoAccion="+IdTipoAccion+"&TipoQuerySQL=" + TipoQuerySQL + "&QuerySQL=" + QuerySQL + "&DBSQL=" + DBSQL,
+        success: function (data)
+        {
+            //contentUpdate.find("#querySQlParametrosOutput").first().html(data);
+            //contentUpdate.find("#querySQlParametrosOutput").first().show();
+            if(data.result !== undefined && data.result!= null && data.result=="NOK")
+                {
+                    alert(data.mensaje);
+                }else
+                {
+                    $("#divContentDetalleArchivo").html(data);
+                    $("#divContentDetalleArchivo").show();
+                }
+        },
+        beforeSend: function (e) {
+            //contentUpdate.find("#querySQlParametrosOutput").first().html("");
+             $("#divContentDetalleArchivo").html("");
+        }
+
+        });
+
+    });
+
+
+
+
+
+
+
+     $(".contentstep").delegate("#btnGuardarStep","click",function(e){
+
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                var contentUpdate =  $(this).parent('div').parent('div');
+
+
+                console.log(contentUpdate);
+
+                var ArchivoId = $("#ArchivoId").val();
+                var StepId = contentUpdate.find("#StepId").first().val(); 
+                var IdTipoAccion = contentUpdate.find("#IdTipoAccion").first().val();
+                var Descripcion = contentUpdate.find("#Descripcion").first().val();
+                var Direccion = contentUpdate.find("#Direccion").first().val();
+                var Orden = contentUpdate.find("#Orden").first().val();
+
+                var DBSQL = contentUpdate.find("#DBSQL").first().val();
+                var TipoQuerySQL = contentUpdate.find("#TipoQuerySQL").first().val();
+                var QuerySQL = contentUpdate.find("#QuerySQL").first().val();
+                var IdMapDataExchanged = contentUpdate.find("#IdMapDataExchanged").first().val();
+
+                var Path_Origen_Manager = contentUpdate.find("#Path_Origen_Manager").first().val();
+                var Path_Destino_Adaia = contentUpdate.find("#Path_Destino_Adaia").first().val();
+
+                var Path_Origen_Adaia = contentUpdate.find("#Path_Origen_Adaia").first().val();
+                var Path_Destino_Manager = contentUpdate.find("#Path_Destino_Manager").first().val();
+
+                var NombreArchivo = contentUpdate.find("#NombreArchivo").first().val();
+
+                var NombreArchivo = contentUpdate.find("#NombreArchivo").first().val();
+                var IsParametroNameFile = contentUpdate.find("#IsParametroNameFile").first().is(':checked');
+                var SeparadorParametrosNameFile = contentUpdate.find("#SeparadorParametrosNameFile").first().val();
+
+                var IsCABParametros = contentUpdate.find("#IsCABParametros").first().is(':checked');
+              
+
+                //console.log(IdStep);
+
+                //IdStep = IdStep ===undefined || IdStep == null || IdStep.length == 0 || IdStep == 0 ? contentUpdate.find('.tablaparametros').first().data('idstep') : IdStep;
+
+                //console.log(IdStep);
+
+                var jsonStep  =
+                {
+                    "StepId":StepId ,
+                    "ArchivoId": ArchivoId ,
+                    "IdTipoAccion":IdTipoAccion,
+                    "Descripcion":Descripcion,
+                    "Direccion":Direccion,
+                    "Orden":Orden,
+                    "NombreArchivo":NombreArchivo,
+                    "DBSQL":DBSQL,
+                    "TipoQuerySQL":TipoQuerySQL,
+                    "QuerySQL":QuerySQL,
+                    "IdMapDataExchanged":IdMapDataExchanged,
+                    "Path_Origen_Manager":Path_Origen_Manager,
+                    "Path_Destino_Adaia":Path_Destino_Adaia,
+                    "Path_Origen_Adaia":Path_Origen_Adaia,
+                    "Path_Destino_Manager":Path_Destino_Manager,
+                    "IsParametroNameFile":IsParametroNameFile,
+                    "SeparadorParametrosNameFile":SeparadorParametrosNameFile,
+                    "IsCABParametros":IsCABParametros
+                    
+                };
+
+                var parametrosInput = [];
+                var parametrosOutput = [];
+
+                contentUpdate.find('.tablaparametros').each(function(index,element)
+                {
+
+                    var tipoParametro = $(this).data('tipoparametro');
+
+                    console.log(tipoParametro);
+
+                    if(tipoParametro == "in")
+                    {
+                        parametrosInput  = GetModeloDataByContentTable($(this));
+                    }else
+                    {
+                        parametrosOutput  = GetModeloDataByContentTable($(this));
+                    }
+
+                });
+
+
+
+
+
+                $.ajax({
+                type: 'POST',
+                url: '@Url.Action("UpdateStep","ManagerInterfaces")' ,
+                data:{ "jsonStep": JSON.stringify(jsonStep) ,"jsonParametrosOutput": JSON.stringify(parametrosOutput),"jsonParametrosInput": JSON.stringify(parametrosInput)},
+                success: function (data)
+                {
+                    if(data.result !== undefined && data.result!= null && data.result=="NOK")
+                    {
+                        alert(data.mensaje);
+                    }else
+                    {
+                        $("#divContentDetalleArchivo").html(data);
+                        $("#divContentDetalleArchivo").show();
+                    }
+                },
+                beforeSend: function (e) {
+                    $("#divContentDetalleArchivo").html("");
+                }
+                });
+
+            });
+
+
+
+
+
+    $(".contentstep").delegate("#IdTipoAccion","change",function(e)
+    {
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        var IdTipoAccion = $(this).val();
+
+        var contentUpdate = $(this).parent('div').parent('div').parent('div').parent('div');
+
+        if(IdTipoAccion == 1)
+        {
+            contentUpdate.find(".archivostep").show();
+            contentUpdate.find(".queryStep").hide();
+            contentUpdate.find(".dataExchanged").hide();
+            contentUpdate.find(".traspasos").hide();
+        }
+        else if(IdTipoAccion == 2)
+        {
+            contentUpdate.find(".queryStep").show();
+            contentUpdate.find(".archivostep").hide();
+            contentUpdate.find(".dataExchanged").hide();
+            contentUpdate.find(".traspasos").hide();
+        }
+        else if(IdTipoAccion == 3)
+        {
+           contentUpdate.find(".dataExchanged").show();
+           contentUpdate.find(".archivostep").hide();
+           contentUpdate.find(".queryStep").hide();
+           contentUpdate.find(".traspasos").hide();
+        }
+        else if(IdTipoAccion == 4)
+        {
+           contentUpdate.find(".traspasos").show();
+           contentUpdate.find(".dataExchanged").hide();
+           contentUpdate.find(".archivostep").hide();
+           contentUpdate.find(".queryStep").hide();
+        }
+
+
+    });
+
+
+
+    $(".contentstep").delegate("#IsParametroNameFile","change",function(e){
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+          var contentUpdate = $(this).parent('div').parent('div').parent('div').parent('div');
+
+        if($(this).is(':checked'))
+        {
+            contentUpdate.find(".isparametrosnamefile").first().show();
+        }else
+        {
+            contentUpdate.find(".isparametrosnamefile").first().hide();
+        }
+
+
+
+
+    });
+
+
+     $(".contentstep").delegate("#IdMapDataExchanged","change",function(e)
+    {
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        console.log('IdMapDataExchanged.change');
+
+        var contentUpdate = $(this).parent('div').parent('div').parent('div').parent('div').first();
+
+        var IdMap = $(this).val();
+        var ArchivoId = $("#ArchivoId").val();
+        
+        //var IdStep = 0;
+
+
+        // var StepId = 0 ;
+        
+        //contentUpdate.find(".tablaparametros").each(function(index,element)
+        //{
+        
+        //    if($(this).data('tipoparametro') == "in")
+        //    {
+        //       StepId = $(this).data('idstep');
+        //    }
+        
+        
+        //});
+
+         var StepId = contentUpdate.find("#StepId").first().val(); 
+
+
+        var Descripcion = contentUpdate.find("#Descripcion").first().val();
+        var Direccion = contentUpdate.find("#Direccion").first().val();
+        var Orden = contentUpdate.find("#Orden").first().val();
+
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetParametrosDataExchangedEntrada","ManagerInterfaces")' + "?IdMap="+IdMap + "&ArchivoId=" + ArchivoId + "&StepId=" +StepId + "&Descripcion=" + Descripcion + "&Direccion=" + Direccion + "&Orden=" + Orden,
+            success: function (data)
+            {
+                //contentUpdate.find("#dataExchangedParametrosInput").first().html(data);
+                //contentUpdate.find("#dataExchangedParametrosInput").first().show();
+                 if(data.result !== undefined && data.result!= null && data.result=="NOK")
+                    {
+                        alert(data.mensaje);
+                    }else
+                    {
+                        $("#divContentDetalleArchivo").html(data);
+                        $("#divContentDetalleArchivo").show();
+                    }
+            },
+            beforeSend: function (e) {
+                //contentUpdate.find("#dataExchangedParametrosInput").first().html("");
+                 $("#divContentDetalleArchivo").html("");
+            }
+
+        });
+
+
+
+
+    });
+
+
+
+        });
+
+
+
+        var GetModeloDataByContentTable = function(content)
+        {
+                var filas = content.find('tbody').first().find('tr');
+
+                var resultados = [];
+
+                for (var i = 0; i < filas.length; i++)
+                {
+
+                var fila = filas[i];
+
+
+                var inputs = fila.getElementsByTagName("input");
+                var selects = fila.getElementsByTagName("select");
+                var objeto = {};
+
+                for (var j = 0; j < inputs.length; j++) {
+                    var nombre = inputs[j].getAttribute("name");
+                    var type = inputs[j].getAttribute("type");
+                    var valor = type == "checkbox"?inputs[j].checked? "true":"false": nombre=="ValueParametro"? inputs[j].getAttribute('data-value') : inputs[j].value;
+                    objeto[nombre] = valor;
+                }
+
+                for (var k = 0; k < selects.length; k++) {
+                    var nombre = selects[k].getAttribute("name");
+                    var valor = selects[k].value;
+                    objeto[nombre] = valor;
+                }
+
+                resultados.push(objeto);
+                }
+
+            return resultados;
+        }
+
+
+</script>
+
+
+
+<div class="form-container">
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="StepId" value="@Model.StepId" />
+    <div class="row g-3">
+        <div class="col-md">
+            <div class="form-floating">
+                @if (Model.IdTipoAccion > 0)
+                {
+                    @Html.DropDownListFor(model => model.IdTipoAccion , idTiposAccion, "--Seleccionar--" ,new { @class = "form-select", @disabled="true", id = "IdTipoAccion" , name="IdTipoAccion"})
+                }
+                else
+                {
+                    @Html.DropDownListFor(model => model.IdTipoAccion , idTiposAccion, "--Seleccionar--" ,new { @class = "form-select", id = "IdTipoAccion" , name="IdTipoAccion"})
+                }
+                <label for="IdTipoAccion">Tipo de Acción</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.TextBoxFor(model => model.Descripcion, new { @class = "form-control", id = "Descripcion" , name="Descripcion"})
+                <label for="Descripcion">Descripción</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.DropDownListFor(model => model.Direccion , idTipoDireccion,"--Seleccionar--", new { @class = "form-select", id = "Direccion", name = "Direccion" })
+                <label for="Direccion">Direccion</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.TextBoxFor(model => model.Orden ,  new { @class = "form-select", @type="number" , id = "Orden", name = "Orden" })
+                <label for="Orden">Orden</label>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.Archivo?"":"display:none")" class="row g-1 archivostep">
+
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.TextBoxFor(model => model.NombreArchivo, new { @class = "form-control", id = "NombreArchivo", name="NombreArchivo" })
+                <label for="floatingInput">Nombre de Archivo</label>
+            </div>
+        </div>
+
+        <div class="row row-spacing g-2">
+            <div class="col-md">
+
+                <div class="form-floating">
+                    @Html.TextBoxFor(model => model.Path_Origen_Manager, new { @class = "form-control", id = "Path_Origen_Manager", name="Path_Origen_Manager" })
+                    <label for="Path_Origen_Manager">Path Origen Manager</label>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="form-floating">
+                    @Html.TextBoxFor(model => model.Path_Destino_Adaia, new { @class = "form-control", id = "Path_Destino_Adaia", name="Path_Destino_Adaia" })
+                    <label for="Path_Destino_Adaia">Path Destino Adaia</label>
+                </div>
+            </div>
+        </div>
+        <div class="row row-spacing g-2">
+            <div class="col-md">
+                <div class="form-floating">
+                    @Html.TextBoxFor(model => model.Path_Origen_Adaia, new { @class = "form-control", id = "Path_Origen_Adaia", name="Path_Origen_Adaia" })
+                    <label for="Path_Origen_Adaia">Path Origen Adaia</label>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="form-floating">
+                    @Html.TextBoxFor(model => model.Path_Destino_Manager, new { @class = "form-control", id = "Path_Destino_Manager", name="Path_Destino_Manager" })
+                    <label for="Path_Destino_Manager">Path Destino Manager</label>
+                </div>
+
+            </div>
+        </div>
+
+         <div class="row row-spacing g-2">
+            <div class="col-md">
+                <label for="IsCABParametros">Contiene Cabecera?</label>
+                @Html.CheckBoxFor(model => model.IsCABParametros, new { @class = "form-checkbox", id = "IsCABParametros", name="IsCABParametros" })
+            </div>
+        </div>
+
+
+        <div class="row row-spacing g-2">
+            <div class="col-md">
+
+                <label for="IsParametroNameFile">El nombre del archivo contiene parametros?</label>
+                @Html.CheckBoxFor(model => model.IsParametroNameFile, new { @class = "form-checkbox", id = "IsParametroNameFile", name="IsParametroNameFile" })
+
+
+            </div>
+
+            <div style="@(Model.IsParametroNameFile?"":"display:none")" class="col-md isparametrosnamefile">
+                <div class="form-floating">
+                    @Html.TextBoxFor(model => model.SeparadorParametrosNameFile, new { @class = "form-control", id = "SeparadorParametrosNameFile", name="SeparadorParametrosNameFile" })
+                    <label for="SeparadorParametrosNameFile">Separador</label>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md">
+            <input type="file" id="Archivo" name="Archivo" data-idarchivo="@Model.ArchivoId" data-idstep="@Model.StepId" class="form-control archivosFileStep" />
+            <label for="Archivo">Archivo</label>
+        </div>
+    </div>
+
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.Archivo?"":"display:none")" id="archivoParametros" class="row archivostep">
+        @if (Model.Parametros.Where(x => x.TipoParametros == "out").Any() && Model.IdTipoAccion.Value.GetTipoAccion() == TipoAccion.Archivo)
+        {
+            @await Html.PartialAsync("~/Views/Shared/ManagerInterfaces/StepParametros.cshtml",Model.Parametros.Where(x=> x.TipoParametros == "out").ToList(), new ViewDataDictionary(this.ViewData){{"IdStep",Model.StepId},{"tipoParametro","out"}})
+        }
+
+    </div>
+
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.QuerySql?"":"display:none")" class="row g-3 queryStep">
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.DropDownListFor(model => model.DBSQL , BasesDatos,"--Seleccionar--", new { @class = "form-select", id = "DBSQL" ,name = "DBSQL" })
+                <label for="DBSQL">BaseDatos</label>
+            </div>
+        </div>
+
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.DropDownListFor(model => model.TipoQuerySQL , idTipoQuery,"--Seleccionar--", new { @class = "form-select", id = "TipoQuerySQL" ,name = "TipoQuerySQL" })
+                <label for="TipoQuerySQL">Tipo Query</label>
+            </div>
+        </div>
+    </div>
+
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.QuerySql?"":"display:none")" class="row queryStep">
+
+        <div class="col-md">
+            <label for="QuerySQL">QuerySQL</label>
+            @Html.TextAreaFor(model => model.QuerySQL,10,30, new { @class = "form-control", id = "QuerySQL" , name="QuerySQL" })
+        </div>
+
+    </div>
+
+
+
+
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.QuerySql?"":"display:none")" class="row g-3 queryStep">
+        <div class="col-md">
+            <button data-idstep="@Model.StepId" class="btn btn-primary btnCargarParametrosQueryEntrada">Cargar Parametros de Entrada</button>
+        </div>
+    </div>
+
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.QuerySql?"":"display:none")" id="querySQlParametrosInput" class="row queryStep">
+
+        @if (Model.Parametros.Where(x => x.TipoParametros == "in").Any() && Model.IdTipoAccion.Value.GetTipoAccion() == TipoAccion.QuerySql)
+        {
+            @await Html.PartialAsync("~/Views/Shared/ManagerInterfaces/StepParametros.cshtml",Model.Parametros.Where(x=> x.TipoParametros == "in").ToList(), new ViewDataDictionary(this.ViewData){{"IdStep",Model.StepId},{"tipoParametro","in"}})
+        }
+    </div>
+
+    <div id="divCargarParametrosQuerySalida" style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.QuerySql?"":"display:none")" class="row divCargarParametrosQuerySalida">
+        <div class="col-md">
+            <button data-idstep="@Model.StepId" class="btn btn-primary btnCargarParametrosQuerySalida">Cargar Parametros de Salida</button>
+        </div>
+    </div>
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.QuerySql?"":"display:none")" id="querySQlParametrosOutput" class="row queryStep">
+        @if (Model.Parametros.Where(x => x.TipoParametros == "out").Any() && Model.IdTipoAccion.Value.GetTipoAccion() == TipoAccion.QuerySql)
+        {
+            @await Html.PartialAsync("~/Views/Shared/ManagerInterfaces/StepParametros.cshtml",Model.Parametros.Where(x=> x.TipoParametros == "out").ToList(), new ViewDataDictionary(this.ViewData){{"IdStep",Model.StepId},{"tipoParametro","out"}})
+        }
+    </div>
+
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.DataExchanged?"":"display:none")" class="row g-3 dataExchanged">
+        <div class="col-md">
+            <div class="form-floating">
+                @Html.DropDownListFor(model => model.IdMapDataExchanged , IdsMapDataExchanged,"--Seleccionar--", new { @class = "form-select", id = "IdMapDataExchanged" ,name = "IdMapDataExchanged" })
+                <label for="IdMapDataExchanged">MapDataExchaned</label>
+            </div>
+        </div>
+    </div>
+    <div style="@(Model != null && (Model.IdTipoAccion.HasValue ? Model.IdTipoAccion.Value.GetTipoAccion() : TipoAccion.Undefined) == TipoAccion.DataExchanged?"":"display:none")" id="dataExchangedParametrosInput" class="row dataExchanged">
+        @if (Model.Parametros.Where(x => x.TipoParametros == "in").Any() && Model.IdTipoAccion.Value.GetTipoAccion() == TipoAccion.DataExchanged)
+        {
+            @await Html.PartialAsync("~/Views/Shared/ManagerInterfaces/StepParametros.cshtml",Model.Parametros.Where(x=> x.TipoParametros == "in").ToList(), new ViewDataDictionary(this.ViewData){{"IdStep",Model.StepId},{"tipoParametro","in"}})
+        }
+    </div>
+
+
+    <div class="row">
+        <input id="btnGuardarStep" type="submit" data-idstep="@Model.StepId" value="Actualziar Step" class="btn btn-primary btnGuardarStep" />
+    </div>
+
+
+</div>
+

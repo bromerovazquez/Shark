@@ -1,0 +1,78 @@
+﻿  @using Drim.Interfaces.MVC.Entities;
+
+  @model List<Interfaces_Procesos>
+@{
+    ViewData["Title"] = "Configuracion de Interfaces";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script>
+
+        $(document).ready(function() {
+        // Manejador de clic para cambiar entre tabs
+        $("#divContentDetalleArchivo").delegate('.nav-link.alink','click', function(e)
+        {
+            e.preventDefault();
+            var targetTab = $(this).data('idpanel');
+
+            // Ocultar todos los content panels y mostrar el seleccionado
+            $('.tab-pane').removeClass('active');
+            $('#' + targetTab).addClass('active');
+
+            // Cambiar clase activa de la pestaña seleccionada
+            $('.nav-link.alink').removeClass('active');
+            $(this).addClass('active');
+        });
+
+
+        $(".closemodal").on("click",function(e){
+        
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            var idModal = $(this).data('modal');
+            $("#" + idModal).modal('hide');
+            $("#" + idModal).find('.modal-body').first().html("");
+        });
+
+    });
+
+
+
+</script>
+
+
+
+<div id="divContentListArchivos">
+    @await Html.PartialAsync("~/Views/Shared/ManagerInterfaces/ProcesosGrid.cshtml",Model)
+</div>
+
+<div style="display:none;" id="divContentDetalleArchivo">
+</div>
+
+
+
+
+
+
+<div class="modal fade" id="modalSetparametros" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modalSetparametros" aria-hidden="true">
+        <div class="modal-dialog modal-lg"  role="document">
+            <div class="modal-content">
+                
+                <div class="modal-header" style="background-color:#343a40;color:#fff" >
+                    <h5 class="modal-title" id="titleSetparametros">Configura Valor Parametro</h5>
+                   
+                    <button type="button" style="color:white !important;" class="closemodal"  data-modal="modalSetparametros" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="divContentSetparametros" class="modal-body">
+                </div>
+                <div style="background-color:#343a40;color:#fff"  class="modal-footer">
+                    <button id="btnSetValueParametro" type="button"  data-modal="modalSetparametros" class="btn btn-success" data-dismiss="modal"> Actualizar Valor del Parametro  </button>
+                    <button type="button" data-modal="modalSetparametros" class="btn btn-secondary closemodal" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,106 @@
+﻿ @{
+    var AlmacenesList = ViewData["almacenes"] != null?  (List<SelectListItem>)ViewData["almacenes"] : new List<SelectListItem>();
+    var LabelAlmacen = ViewData["LabelAlmacen"] != null ?  (string)ViewData["LabelAlmacen"]:"Almacen";
+    var IdSelectAlmacen = ViewData["IdAlmacen"] != null ?  (string)ViewData["IdAlmacen"]:"ddlFilterAlmacen";
+    var value = ViewData["value"] != null ?  (string)ViewData["value"]:"";
+    var onlyread = ViewData["onlyread"] != null ?  (bool)ViewData["onlyread"]:false;
+
+    var colLabel = ViewData["colLabel"] != null ?  (string)ViewData["colLabel"]:"col-6";
+    var colSelect = ViewData["colSelect"] != null ?  (string)ViewData["colSelect"]:"col-6";
+    var isDevolucion =  ViewData["isDevolucion"] != null ?  (bool)ViewData["isDevolucion"]:false;
+
+    AlmacenesList = isDevolucion? AlmacenesList.Where(x => x.Value.Trim() == "Y" || x.Value.Trim() == "YY").ToList() : AlmacenesList;
+}
+
+
+<style>
+
+  select[data-max-options="1"] ~ .dropdown-menu .bs-actionsbox .bs-select-all {
+  display: none;
+}
+
+select[data-max-options="1"] ~ .dropdown-menu .bs-actionsbox .bs-deselect-all {
+  width: 200px;
+}
+
+.filter-option {
+    font-size: 12px !important;
+}
+
+
+</style>
+
+
+
+<script>
+
+
+    $(document).ready(function()
+    {
+    
+
+        var idSelect = "@IdSelectAlmacen";
+        var valSelect = "@value";
+        
+        console.log(valSelect);
+
+     $("#" + idSelect).selectpicker(
+                  {
+                      liveSearch: true,
+                      allowClear: "true",
+                      container: "body",
+                      liveSearch: true,
+                      title: "Buscar Almacen",
+                      hideDisabled: true
+                  }
+              );
+
+
+              $("#" + idSelect).val(valSelect);
+
+            console.log($("#hdisabled_"+idSelect).val());
+
+              if($("#hdisabled_"+idSelect).val() == "true")
+              {
+                  $("#" + idSelect).attr('disabled', true);
+              }
+              
+    
+
+
+              $("#" + idSelect).selectpicker('refresh');
+              //$("#" + idSelect).selectpicker('render');
+    
+    
+    
+    
+    
+    });
+
+
+</script>
+
+
+<label class="@colLabel col-form-label drim-label">@LabelAlmacen:</label>
+<div class="@colSelect">
+
+<select  class="selectpicker form-control" data-width="fit" style="font-size:10px !important;"  id="@IdSelectAlmacen" @(onlyread?"readonly":"") data-live-search="true" data-max-options="1" data-actions-box="true"  title="Buscar Almacen" data-deselect-all-text="Limpiar"  data-width="200px" multiple>
+
+    @if (AlmacenesList != null && AlmacenesList.Any())
+    {
+        @foreach (var almacen in AlmacenesList)
+        {
+                @if (!string.IsNullOrEmpty(value) && almacen.Value == value)
+                {
+                    <option selected="selected" value="@almacen.Value">@almacen.Text</option>
+                }else
+                {
+                    <option value="@almacen.Value">@almacen.Text</option>
+                }
+
+        }
+    }
+
+</select>
+</div>
+<input type="hidden" id="hdisabled_@IdSelectAlmacen" value="@(onlyread?"true":"false")" />

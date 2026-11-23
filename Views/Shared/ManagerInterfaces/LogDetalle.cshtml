@@ -1,0 +1,42 @@
+﻿@model   Drim.Interfaces.MVC.Entities.vLogInterfaces
+
+
+@if(Model!=null){
+<!-- Tabla de Detalle -->
+<table class="tableDetalleLog">
+    <tbody id="detalleTablaBody">
+      <tr>
+          <td>Nombre Proceso:</td>
+          <td>@Model.NombreProceso</td>
+      </tr>
+      <tr>
+          <td>Step:</td>
+          <td>@Model.StepDescripcion</td>
+      </tr>
+      <tr>
+          <td>Datos Entrada:</td>
+          <td>@Model.DataIn</td>
+      </tr>
+      <tr>
+          <td>Datos Salida:</td>
+          <td>@Model.DataOut</td>
+      </tr>
+      <tr>
+          <td>Fecha Creacion:</td>
+          <td>@Model.DateCreate</td>
+      </tr>
+      <tr>
+          <td>Fecha Update:</td>
+          <td>@Model.DateUpdate</td>
+      </tr>
+      <tr>
+          <td>Estado:</td>
+          <td>@Model.Estado</td>
+      </tr>
+      <tr>
+          <td>Error:</td>
+          <td>@Model.Error</td>
+      </tr>
+    </tbody>
+</table>
+}

@@ -1,0 +1,21 @@
+﻿@{
+    var colLabel = ViewData["colLabel"] != null ?  (string)ViewData["colLabel"]:"col-6";
+    var colSelect = ViewData["colSelect"] != null ?  (string)ViewData["colSelect"]:"col-6";
+
+    var IdSelectArticulo = ViewData["IdSelectArticulo"] != null ?  (string)ViewData["IdSelectArticulo"]:"ddlFilterArticulo";
+
+}
+
+
+<label class="@colLabel col-form-label drim-label">Articulo:</label>
+
+<div class="@colSelect">
+    <select class="selectpicker form-control filterArticulo" id="@IdSelectArticulo"
+            data-allow-clear="true"
+            data-container="body"
+            data-live-search="true"
+            title="Buscar Articulo"
+            data-hide-disabled="true"
+            data-actions-box="true">
+    </select>
+</div>

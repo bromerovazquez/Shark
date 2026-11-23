@@ -1,0 +1,307 @@
+﻿
+@{
+    ViewData["Title"] = "Abaranes - Devoluciones Proveedor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var AlmacenesList = ViewData["almacenes"] != null?  (List<SelectListItem>)ViewData["almacenes"] : new List<SelectListItem>();
+    var proveedores = ViewData["proveedores"] != null?  (List<SelectListItem>)ViewData["proveedores"] : new List<SelectListItem>();
+
+    var traspasosDevolucionesProveedores = ViewData["traspasos"] != null ? (List<Drim.Interfaces.MVC.ViewModels.TraspasoProveedorOrigenDestino>)ViewData["traspasos"] : new List<Drim.Interfaces.MVC.ViewModels.TraspasoProveedorOrigenDestino>();
+
+}
+
+
+
+<script>
+
+    $(document).ready(function()
+    {
+    
+    
+        $("#tbnBuscarAlbaranes").on("click",function()
+        {
+            BuscarTraspasosY();
+        });
+
+
+    $("#divContainerGridTraspasosY").delegate('.verdetalletraspasosproveedor',"click",function(e)
+    {
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log("verdetalletraspasos");
+
+        var origen = $(this).data('origen');
+        var fechaInicio = $(this).data('fechainicio');
+        var fechaFin = $(this).data('fechafin');
+        var codproveedor = $(this).data('codproveedor');
+
+        var trDetalle = $(".trdetalleTraspasos_" + codproveedor + "_" + origen + "_" + fechaInicio + "_"+ fechaFin).first();
+        var contentDetalle = trDetalle.find('.tdcontentDetalleTraspasos').first();
+
+
+        console.log(".trdetalleTraspasos_" + codproveedor + "_" + origen + "_" + fechaInicio + "_"+ fechaFin);
+
+        console.log(trDetalle);
+
+
+        console.log($(this).hasClass('activodetalletraspaso'));
+
+        if(!$(this).hasClass('activodetalletraspaso'))
+        {
+            $(this).html("-");
+            trDetalle.show();
+            $(this).addClass('activodetalletraspaso');
+
+        }else
+        {
+
+         $(this).html("+");
+         trDetalle.hide();
+         $(this).removeClass('activodetalletraspaso');
+        }
+
+    });
+
+
+     $("#divContainerGridTraspasosY").delegate('.modificarTraspaso', "click", function (e) 
+     {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        console.log('modificarTraspaso');
+
+        var codproveedor= $(this).data('codproveedor');
+        var origen= $(this).data('origen');
+        var destino= $(this).data('destino');
+        var fechaInicio= $(this).data('fechainicio');
+        var fechaFin= $(this).data('fechafin');
+        var codArticulo= $(this).data('codarticulo');
+        var IsSeparadoPorTienda = null;
+
+        CargarTraspasosYModificacion(codproveedor,origen,fechaInicio,fechaFin,codArticulo,IsSeparadoPorTienda);
+
+     
+     });
+
+
+      $("#divContentModificarTraspasosY").delegate("#btnGeneraAlbaranTraspasoY","click",function(e)
+        {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            var codProveedor = $(this).data('codproveedor');
+            var fechainicio = $(this).data('fechainicio');
+            var fechafin = $(this).data('fechafin');
+            var origen = $(this).data('origen');
+            var destino = $(this).data('destino');
+            var codarticulo = $(this).data('codarticulo');
+            var IsSeparadoPorTienda = $(this).data('isseparadoportienda');
+
+
+            var codAlmacenOrigen = $("#ddlFilterAlmacenOrigen").val();
+            var codAlmacenDestino = $("#ddlFilterAlmacenDestino").val();
+
+
+            if(origen.length==0)
+            {
+                origen = codAlmacenOrigen;
+            }
+
+
+            if(destino.length==0)
+            {
+                destino = codAlmacenDestino;
+            }
+
+
+
+            $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GeneraAlbaranesDevolucionTraspasosY","Albaranes")',
+            data: { "codProveedor":codProveedor, "codAlmacenOrigen": origen , "codAlmacenDestino": destino,  "fechainicio": fechainicio, "fechafin":fechafin,  "codarticulo":  codarticulo ,"IsSeparadoPorTienda":IsSeparadoPorTienda },
+            success: function (data)
+            {
+
+                if(data.result=="OK")
+                {
+                    alert("Se proceso correctamente");
+                }else
+                {
+                    alert(data.mensaje);
+                }
+
+                $("#modalModificacionTraspasosY").modal('hide');
+                BuscarTraspasosY();
+            },
+            beforeSend: function (e) {
+                $("#divModalLoading").modal("show");
+            }
+            });
+
+
+
+        });
+
+
+
+
+    $(".btngeneraalbaranes").on("click",function(e)
+    {
+    
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        console.log('.btngeneraalbaranes');
+
+        var codAlmacenOrigen = $("#ddlFilterAlmacenOrigen").val();
+        var codAlmacenDestino = $("#ddlFilterAlmacenDestino").val();
+
+        var fechaInicio = $("#txbFilterFechaInicio").val();
+        var fechaFin = $("#txbFilterFechaFin").val();
+        var estado = $("#ddlFilterEstadoAlbaranes").val();
+        var codArticulo = $("#ddlFilterArticulo").val();
+        var codProveedor = $("#ddlFilterProveedor").val();
+        var IsSeparadoPorTienda = $(this).data('isseparadoportienda');
+
+
+        console.log(IsSeparadoPorTienda);
+
+       
+
+        
+        if(fechaInicio.length ==0)
+        {
+        alert("Debes de introducir la fecha inicio");
+        return;
+        }
+        if(fechaFin.length ==0)
+        {
+        alert("Debes de introducir la fecha fin");
+        return;
+        }
+
+
+        console.log(codAlmacenOrigen);
+        console.log(codAlmacenDestino);
+
+
+
+        CargarTraspasosYModificacion(codProveedor,codAlmacenOrigen,codAlmacenDestino,fechaInicio,fechaFin,codArticulo,IsSeparadoPorTienda);
+    
+    
+    });
+    
+    });
+
+    
+     var CargarTraspasosYModificacion = function(codproveedor,origen,destino,fechaInicio,fechaFin,codArticulo,IsSeparadoPorTienda)
+     {
+
+         console.log('CargarTraspasosModificacion');
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetTraspasosYModificacion","Albaranes")' + "?codproveedor="+codproveedor+"&codAlmacenOrigen=" + origen + "&codAlmacenDestino=" + destino + "&fechaInicio=" + fechaInicio+ "&fechaFin=" + fechaFin  +"&codArticulo="+codArticulo + "&IsSeparadoPorTienda=" + IsSeparadoPorTienda,
+            success: function (data)
+            {
+                $("#divModalLoading").modal("hide");
+                $("#modalModificacionTraspasosY").modal('show');
+                $("#divContentModificarTraspasosY").html(data);
+            },
+            beforeSend: function (e) {
+                $("#divModalLoading").modal("show");
+                $("#divContentModificarTraspasosY").html("");
+            }
+        });
+     };
+
+
+   var BuscarTraspasosY = function()
+    {
+    
+     var codAlmacenOrigen = $("#ddlFilterAlmacenOrigen").val();
+     var codAlmacenDestino = $("#ddlFilterAlmacenDestino").val();
+     var fechaInicio = $("#txbFilterFechaInicio").val();
+     var fechaFin = $("#txbFilterFechaFin").val();
+     var estado = $("#ddlFilterEstadoAlbaranes").val();
+
+     var codArticulo = $("#ddlFilterArticulo").val();
+
+     var codProveedor = $("#ddlFilterProveedor").val();
+
+
+     var containerResult =  "divContainerGridTraspasosY";// $("#hidContainerGridResult").val();
+
+
+      if(fechaInicio.length ==0)
+        {
+        alert("Debes de introducir la fecha inicio");
+        return;
+        }
+        if(fechaFin.length ==0)
+        {
+        alert("Debes de introducir la fecha fin");
+        return;
+        }
+
+         $("#divModalLoading").modal("show");
+
+        $.ajax({
+
+            type: 'GET',
+            url: '@Url.Action("GetTraspasosYDevolucionesProveedor","Albaranes")' + "?codProveedor="+codProveedor +"&codAlmacenOrigen=" + codAlmacenOrigen+"&codAlmacenDestino=" + codAlmacenDestino + "&fechaInicio=" + fechaInicio + "&fechaFin=" + fechaFin + "&estado=" + estado  + "&codArticulo=" + codArticulo  ,
+            success: function (data) 
+            {
+                if(data.result!= null && data.result =="NOK")
+                {
+                    alert(data.mensaje);
+                }
+
+                $("#divModalLoading").modal("hide");
+                $("#" + containerResult).html(data);
+            },
+            beforeSend: function (e) {
+                $("#" + containerResult).html("");
+            }
+        });
+    };
+
+</script>
+
+
+
+<div style="width:70%">
+@await Html.PartialAsync("~/Views/Shared/Albaranes/FiltersAlbaranes.cshtml",AlmacenesList, new ViewDataDictionary(this.ViewData){ { "divContainerGridTraspasos","divContainerGridTraspasos" },{"FilterAlmacenDestinoValue","Y"},{"FilterAlmacenDestinoOnlyread",false} })
+</div>
+<br />
+<br />
+<div id="divContainerGridTraspasosY">
+
+    @if (traspasosDevolucionesProveedores.Any())
+    {
+        @await Html.PartialAsync("~/Views/Shared/Albaranes/AlbaranesAlmacenProveedorGrid.cshtml",traspasosDevolucionesProveedores)
+    }else
+    {
+        <p>Sin Devoluciones</p>
+    }
+
+</div>
+
+
+    
+<div class="modal fade" id="modalModificacionTraspasosY" aria-hidden="true" data-backdrop="static" data-keyboard="false" tabindex="-1" role="alert" aria-labelledby="modalModificacionTraspasosY">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" >
+            <div class="modal-header" style="background-color:red;color:white">
+                <h5 class="modal-title" id="headTitleModalCrearBaja">Accion Traspaso Devolucion Proveedores</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;overflow-x:auto;">
+                <div id="divContentModificarTraspasosY" class="container-fluid" style="overflow-y: auto;overflow-x:auto;">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+
+/**
+ * 2019 - DRIM
+ * v1.0.0
+ *
+ * @author    Carlos Torrijos
+ * @copyright 2019 Drim
+ *
+ * CSS Planificador
+ */
+
+
+.dcenter {display: grid; align-items: center; text-align: -webkit-center;}
+.dbackground {background-color: #004797;}
+.dverticalcenter {align-items: center; min-block-size: -webkit-fill-available;}
+.superiorTable { background-color: #ced3d8; color: black; font-size:12px;}
+.txtcenter {text-align: center;}
+tbody tr td {color: black;}
+
+
+
+
+.drim-label, dt {
+    color: black;
+    font-weight: bold;
+}

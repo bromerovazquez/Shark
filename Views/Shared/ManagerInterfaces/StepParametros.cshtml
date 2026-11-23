@@ -1,0 +1,219 @@
+﻿@using Drim.Interfaces.MVC.Entities
+@using Drim.Interfaces.MVC.Helpers
+@model List<Interfaces_Procesos_Steps_Parametros>
+
+
+@{
+
+
+    Dictionary<string, string> _tipoDatos = new Dictionary<string, string>();
+    _tipoDatos.Add("smallint", "smallint");
+    _tipoDatos.Add("int", "int");
+    _tipoDatos.Add("bigint", "bigint");
+    _tipoDatos.Add("decimal", "decimal");
+    _tipoDatos.Add("double", "double");
+    _tipoDatos.Add("bit", "bit");
+    _tipoDatos.Add("nvarchar", "nvarchar");
+    _tipoDatos.Add("datetime", "datetime");
+    _tipoDatos.Add("date", "date");
+    _tipoDatos.Add("time", "time");
+    SelectList tipoDatos = new SelectList(_tipoDatos, "Key", "Value");
+
+    Dictionary<string, string> tipoValueMap = new Dictionary<string, string>();
+    tipoValueMap.Add("-1", "--Seleccionar--");
+    tipoValueMap.Add("c", "Constante");
+    tipoValueMap.Add("p", "Parametro");
+    SelectList idTipoValueMap = new SelectList(tipoValueMap, "Key", "Value");
+
+    long IdStep = ViewData["IdStep"] != null ? (long)ViewData["IdStep"] : 0;
+
+    string tipoParametro = ViewData["tipoParametro"] != null ? (string)ViewData["tipoParametro"] : string.Empty;
+
+    var allParametrosArchivoSteps = ViewData["allParametrosArchivoSteps"] != null ? (List<Interfaces_Procesos_Steps_Parametros>)ViewData["allParametrosArchivoSteps"] : new List<Interfaces_Procesos_Steps_Parametros>();
+
+
+    Dictionary<string, string> _FormatDateTime = new Dictionary<string, string>();
+    _FormatDateTime.Add("dd/MM/yyyy", "dd/MM/yyyy");
+    _FormatDateTime.Add("dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy HH:mm:ss");
+    _FormatDateTime.Add("dd-MM-yyyy", "dd-MM-yyyy");
+    _FormatDateTime.Add("dd-MM-yyyy HH:mm:ss", "dd-MM-yyyy HH:mm:ss");
+    _FormatDateTime.Add("yyyy/MM/dd", "yyyy/MM/dd");
+    _FormatDateTime.Add("yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd  HH:mm:ss");
+    _FormatDateTime.Add("yyyy-MM-dd", "yyyy-MM-dd");
+    _FormatDateTime.Add("yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss");
+    _FormatDateTime.Add("ddMMyyyy", "ddMMyyyy");
+    _FormatDateTime.Add("ddMMyyyyHHmmss", "ddMMyyyyHHmmss");
+    _FormatDateTime.Add("yyyyMMdd", "yyyyMMdd");
+    _FormatDateTime.Add("yyyyMMddHHmmss", "yyyyMMddHHmmss");
+    _FormatDateTime.Add("yyMMdd", "yyMMdd");
+    _FormatDateTime.Add("yyMMddHHmmss", "yyMMddHHmmss");
+    _FormatDateTime.Add("hh:mm:ss", "hh:mm:ss");
+    _FormatDateTime.Add("hhmmss", "hhmmss");
+
+    SelectList FormatDateTime = new SelectList(_FormatDateTime, "Key", "Value");
+
+
+}
+
+<script>
+
+    $(document).ready(function()
+    {
+
+        $(".txbValueParametroActivo").on("click",function(e)
+        {
+
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+
+
+
+            var idparametro = $(this).data('idparametro');
+
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Action("GetSetValueParametroStep","ManagerInterfaces")' + "?idparametro="+idparametro,
+                success: function (data)
+                {
+                    $("#modalSetparametros").modal('show');
+                    $("#divContentSetparametros").html(data);
+
+                },
+                beforeSend: function (e) {
+                    $("#divContentSetparametros").html("");
+                }
+
+            });
+
+
+            $("#contentSeleccionarParametro").html("");
+
+        });
+
+
+        $(".TypeDataParametro").on("click",function(e){
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            if($(this).val() == "date" || $(this).val() == "datetime" || $(this).val() == "time")
+            {
+                $(this).parent('td').find('.FormatDateTime').first().show();
+            }else{
+                $(this).parent('td').find('.FormatDateTime').first().hide();
+            }
+
+        });
+
+    });
+
+
+</script>
+
+
+
+
+<h2>Parametros de @(tipoParametro=="in"?"Entrada":"Salida")</h2>
+
+<table data-idstep="@IdStep" data-tipoparametro="@tipoParametro" id="tablaparametros" class="table-container tablaparametros">
+    <thead>
+        <tr>
+            <th>Linea</th>
+            <th>Index</th>
+            <th>Key</th>
+            <th>Nombre</th>
+            <th>Tipo Dato Value</th>
+
+
+            <th>Value</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var parametro in Model.OrderBy(x => x.LineaArchivo).ThenBy(x => x.Value_IndexParametros))
+        {
+            <tr>
+                <td>
+                    <input type="hidden" name="ParametroId" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" id="hIdParametro_@parametro.ParametroId" value="@parametro.ParametroId">
+                    <input type="text" style="width:30px" name="LineaArchivo" class="form-control" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" id="txtLineaParametro_@parametro.ParametroId" value="@parametro.LineaArchivo">
+                </td>
+                <td>
+                    <input type="text" style="width:30px" name="Value_IndexParametros" class="form-control" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" id="txtIndexParametro_@parametro.ParametroId" value="@parametro.Value_IndexParametros">
+                </td>
+                <td>
+                    @if (parametro.IsKey.HasValue && parametro.IsKey.Value)
+                    {
+                        <input type="checkbox" style="width:30px" name="IsKey" class="form-checkbox" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" id="IsKey_@parametro.ParametroId" checked="checked">
+                    }
+                    else
+                    {
+                        <input type="checkbox" style="width:30px" name="IsKey" class="form-checkbox" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" id="IsKey_@parametro.ParametroId">
+                    }
+                </td>
+                <td>
+                    <input type="text" style="width:200px" name="NombreParametro" class="form-control" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" id="txtNombreParametro_@parametro.ParametroId" value="@parametro.NombreParametro">
+                </td>
+                <td>
+                    <select class="TypeDataParametro" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" name="TypeDataParametro" id="TypeDataParametro">
+                        <option value="-1">--Seleccionar--</option>
+                        @foreach (var tipodato in tipoDatos)
+                        {
+                            @if (!string.IsNullOrEmpty(parametro.TypeDataParametro) && tipodato.Value.ToLower().Trim() == parametro.TypeDataParametro.ToLower().Trim())
+                            {
+                                <option selected="selected" value="@tipodato.Value">@tipodato.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@tipodato.Value">@tipodato.Text</option>
+                            }
+                        }
+                    </select>
+
+                    <select class="FormatDateTime" style="@(!string.IsNullOrEmpty(parametro.TypeDataParametro) && (parametro.TypeDataParametro == "date" || parametro.TypeDataParametro == "datetime"|| parametro.TypeDataParametro == "time")?"":"display:none")" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" name="FormatDateTime" id="FormatDateTime">
+                        <option value="-1">--Seleccionar--</option>
+                        @foreach (var formatDateTime in FormatDateTime)
+                        {
+                            @if (!string.IsNullOrEmpty(parametro.FormatDateTime) && formatDateTime.Value.ToLower().Trim() == parametro.FormatDateTime.ToLower().Trim())
+                            {
+                                <option selected="selected" value="@formatDateTime.Value">@formatDateTime.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@formatDateTime.Value">@formatDateTime.Text</option>
+                            }
+                        }
+                    </select>
+                </td>
+                @if (tipoParametro == "in")
+                {
+                    <td>
+                        @if (!string.IsNullOrEmpty(parametro.ValueParametro) && parametro.ValueParametro.IndexOf("[") != -1)
+                        {
+                            <input name="ValueParametro" style="font-size:11px;width:500px;height:30px;" id="txbValueParametro_@parametro.ParametroId" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" type="text" class="@(tipoParametro == "in"?"txbValueParametroActivo":"txbValueParametro")" data-value="@parametro.ValueParametro" value="@(!string.IsNullOrEmpty(parametro.ValueParametro)?parametro.ValueParametro.GetDescripcionValueParametroStep(allParametrosArchivoSteps):"")" />
+                        }
+                        else
+                        {
+                            <input name="ValueParametro" style="font-size:11px;width:500px;height:30px;" id="txbValueParametro_@parametro.ParametroId" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" type="text" class="@(tipoParametro == "in"?"txbValueParametroActivo":"txbValueParametro")" data-value="@parametro.ValueParametro" value="@(!string.IsNullOrEmpty(parametro.ValueParametro)? parametro.ValueParametro.Replace("<","").Replace(">",""):"")" />
+                        }
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        @if (!string.IsNullOrEmpty(parametro.ValueParametro) && parametro.ValueParametro.IndexOf("[") != -1)
+                        {
+                            <input readonly="readonly" style="font-size:11px;width:500px;height:30px;" name="ValueParametro" id="txbValueParametro_@parametro.ParametroId" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" type="text" class="@(tipoParametro == "in"?"txbValueParametroActivo":"txbValueParametro")" data-value="@parametro.ValueParametro" value="@(!string.IsNullOrEmpty(parametro.ValueParametro)?parametro.ValueParametro.GetDescripcionValueParametroStep(allParametrosArchivoSteps):"")" />
+                        }
+                        else
+                        {
+                            <input readonly="readonly" style="font-size:11px;width:500px;height:30px;" name="ValueParametro" id="txbValueParametro_@parametro.ParametroId" data-idstep="@parametro.StepId" data-idparametro="@parametro.ParametroId" type="text" class="@(tipoParametro == "in"?"txbValueParametroActivo":"txbValueParametro")" data-value="@parametro.ValueParametro" value="@(!string.IsNullOrEmpty(parametro.ValueParametro)? parametro.ValueParametro.Replace("<","").Replace(">",""):"")" />
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
